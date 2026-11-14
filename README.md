@@ -62,3 +62,7 @@ Explore includes broad India geographic-area presets (All India, North, Central,
 
 ## Experimental hotspot clustering
 FirePulse can group nearby detections into potential activity clusters and rank them using a documented heuristic based on detection count, summed FRP and high-confidence share. The default neighborhood radius is 5 km. Insights displays the highest-ranked clusters and their coordinates. These groupings are not verified incidents, fire perimeters, official danger ratings or emergency alerts. See [data methodology](docs/DATA_METHODOLOGY.md) for the exact scoring formula and limitations.
+
+
+## Historical activity
+Insights includes a date-scoped archive query using NASA FIRMS Standard Processing (SP) products. Select a start date to retrieve a five-day historical summary for India, including detection counts, high-confidence detections and summed FRP. SP products can have a processing lag and should not be treated as directly interchangeable with near-real-time NRT feeds. The API limits each request to five days; it does not fabricate missing dates or infer historical fire spread.
