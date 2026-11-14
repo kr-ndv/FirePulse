@@ -54,6 +54,21 @@ data class FireClustersResponse(
 data class DailyFireCount(val date: String, val detections: Int)
 data class SatelliteFireCount(val satellite: String, val detections: Int)
 
+data class HistoricalFireSummaryResponse(
+    val source: String,
+    val days: Int,
+    val start_date: String,
+    val end_date: String,
+    val count: Int,
+    val data_status: String,
+    val cached_at: String?,
+    val by_day: List<DailyFireCount>,
+    val by_satellite: List<SatelliteFireCount>,
+    val frp_total_mw: Double,
+    val high_confidence_count: Int,
+    val note: String
+)
+
 data class FireSummaryResponse(
     val source: String,
     val days: Int,
@@ -88,6 +103,17 @@ interface FirePulseApi {
         @Query("source") source: String = "VIIRS_SNPP_NRT",
         @Query("radius_km") radiusKm: Double = 5.0
     ): FireClustersResponse
+
+    @GET("api/v1/history")
+    suspend fun getHistoricalSummary(
+        @Query("west") west: Double,
+        @Query("south") south: Double,
+        @Query("east") east: Double,
+        @Query("north") north: Double,
+        @Query("start_date") startDate: String,
+        @Query("days") days: Int = 5,
+        @Query("source") source: String = "VIIRS_SNPP_SP"
+    ): HistoricalFireSummaryResponse
 
     @GET("api/v1/summary")
     suspend fun getSummary(
