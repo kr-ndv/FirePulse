@@ -25,7 +25,7 @@ async def summary(
     east: float = Query(..., ge=-180, le=180),
     north: float = Query(..., ge=-90, le=90),
     days: int = Query(1, ge=1, le=5),
-    source: str = Query("VIIRS_SNPP_NRT"),
+    source: str = Query("VIIRS_NOAA21_NRT"),
 ):
     if south >= north or west >= east:
         raise HTTPException(status_code=400, detail="Invalid bounding box")
@@ -50,7 +50,7 @@ async def fires_geojson(
     east: float = Query(..., ge=-180, le=180),
     north: float = Query(..., ge=-90, le=90),
     days: int = Query(1, ge=1, le=5),
-    source: str = Query("VIIRS_SNPP_NRT"),
+    source: str = Query("VIIRS_NOAA21_NRT"),
 ):
     if south >= north or west >= east:
         raise HTTPException(status_code=400, detail="Invalid bounding box")
@@ -79,7 +79,7 @@ async def fire_clusters(
     east: float = Query(..., ge=-180, le=180),
     north: float = Query(..., ge=-90, le=90),
     days: int = Query(1, ge=1, le=5),
-    source: str = Query("VIIRS_SNPP_NRT"),
+    source: str = Query("VIIRS_NOAA21_NRT"),
     radius_km: float = Query(5.0, ge=0.5, le=25.0),
 ):
     if south >= north or west >= east:
@@ -111,7 +111,7 @@ async def historical_summary(
     north: float = Query(..., ge=-90, le=90),
     start_date: date = Query(..., description="First UTC acquisition date, YYYY-MM-DD"),
     days: int = Query(1, ge=1, le=5),
-    source: str = Query("VIIRS_SNPP_SP"),
+    source: str = Query("VIIRS_NOAA21_SP"),
 ):
     """Aggregate FIRMS observations for an explicit historical date window."""
     if south >= north or west >= east:
