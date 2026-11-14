@@ -1,6 +1,7 @@
 package com.firepulse.app.data.remote
 import retrofit2.http.GET
 import retrofit2.http.Query
+
 data class FireObservation(
  val latitude:Double,val longitude:Double,val acquisition_date:String,
  val acquisition_time:String?,val satellite:String?,val instrument:String?,
@@ -9,6 +10,13 @@ data class FireObservation(
 data class FireObservationsResponse(
  val source:String,val count:Int,val retrieved_on:String?,val observations:List<FireObservation>
 )
+data class DailyFireCount(val date:String,val detections:Int)
+data class SatelliteFireCount(val satellite:String,val detections:Int)
+data class FireSummaryResponse(
+ val source:String,val days:Int,val count:Int,val retrieved_on:String,
+ val by_day:List<DailyFireCount>,val by_satellite:List<SatelliteFireCount>,
+ val frp_total_mw:Double,val high_confidence_count:Int
+)
 interface FirePulseApi {
  @GET("api/v1/fires")
  suspend fun getFires(
@@ -16,4 +24,11 @@ interface FirePulseApi {
   @Query("east") east:Double,@Query("north") north:Double,
   @Query("days") days:Int=1,@Query("source") source:String="VIIRS_SNPP_NRT"
  ):FireObservationsResponse
+
+ @GET("api/v1/summary")
+ suspend fun getSummary(
+  @Query("west") west:Double,@Query("south") south:Double,
+  @Query("east") east:Double,@Query("north") north:Double,
+  @Query("days") days:Int=5,@Query("source") source:String="VIIRS_SNPP_NRT"
+ ):FireSummaryResponse
 }
