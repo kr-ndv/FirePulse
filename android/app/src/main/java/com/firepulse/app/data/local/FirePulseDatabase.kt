@@ -41,6 +41,9 @@ interface FireObservationDao {
     @Query("DELETE FROM fire_observations WHERE source = :source AND requestedDays = :days")
     suspend fun clearSnapshot(source: String, days: Int)
 
+    @Query("SELECT MAX(cachedAt) FROM fire_observations WHERE source = :source AND requestedDays = :days")
+    suspend fun getSnapshotCachedAt(source: String, days: Int): Long?
+
     @Query("DELETE FROM fire_observations WHERE cachedAt < :cutoff")
     suspend fun deleteOlderThan(cutoff: Long)
 
