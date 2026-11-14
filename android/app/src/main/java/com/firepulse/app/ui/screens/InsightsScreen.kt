@@ -60,7 +60,7 @@ import kotlinx.coroutines.withContext
       Text(day.date,style=MaterialTheme.typography.bodySmall)
       Text(day.detections.toString(),style=MaterialTheme.typography.labelMedium)
      }
-     LinearProgressIndicator(progress={day.detections.toFloat()/maxValue},modifier=Modifier.fillMaxWidth())
+     LinearProgressIndicator(progress=day.detections.toFloat()/maxValue,modifier=Modifier.fillMaxWidth())
     }
    }
    FirePulseCard(Modifier.fillMaxWidth()) {
