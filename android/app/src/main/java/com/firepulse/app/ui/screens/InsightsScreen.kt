@@ -43,9 +43,7 @@ fun InsightsScreen() {
         } catch (clusterException: Exception) {
             clusterError = clusterException.localizedMessage ?: "Unable to load hotspot clusters"
         }
-        } finally {
-            loading = false
-        }
+        loading = false
     }
 
     Column(
