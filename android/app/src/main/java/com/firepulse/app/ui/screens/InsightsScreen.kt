@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.firepulse.app.data.remote.ApiClient
 import com.firepulse.app.data.remote.FireSummaryResponse
 import com.firepulse.app.data.remote.FireClustersResponse
+import com.firepulse.app.data.remote.HistoricalFireSummaryResponse
 import com.firepulse.app.ui.components.FirePulseCard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,6 +20,10 @@ fun InsightsScreen() {
     var summary by remember { mutableStateOf<FireSummaryResponse?>(null) }
     var clusters by remember { mutableStateOf<FireClustersResponse?>(null) }
     var clusterError by remember { mutableStateOf<String?>(null) }
+    var historical by remember { mutableStateOf<HistoricalFireSummaryResponse?>(null) }
+    var historicalDate by remember { mutableStateOf("2026-10-01") }
+    var historicalLoading by remember { mutableStateOf(false) }
+    var historicalError by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var refresh by remember { mutableIntStateOf(0) }
@@ -113,6 +118,61 @@ fun InsightsScreen() {
         }
         clusterError?.let {
             Text("Cluster analysis unavailable: $it", color = MaterialTheme.colorScheme.error)
+        }
+
+        FirePulseCard(Modifier.fillMaxWidth()) {
+            Text("Historical activity", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Query an archived date window from NASA FIRMS. Standard Processing products may be delayed compared with near-real-time feeds.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            OutlinedTextField(
+                value = historicalDate,
+                onValueChange = { historicalDate = it },
+                label = { Text("Start date (YYYY-MM-DD)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Button(
+                onClick = {
+                    historicalLoading = true
+                    historicalError = null
+                    historical = null
+                    val validDate = runCatching { java.time.LocalDate.parse(historicalDate) }.isSuccess
+                    if (!validDate) {
+                        historicalError = "Enter a valid date in YYYY-MM-DD format."
+                        historicalLoading = false
+                    } else {
+                        kotlinx.coroutines.MainScope().launch {
+                            try {
+                                historical = withContext(Dispatchers.IO) {
+                                    ApiClient.firePulseApi.getHistoricalSummary(
+                                        68.0, 6.0, 98.0, 37.5, historicalDate, 5, "VIIRS_SNPP_SP"
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                historicalError = e.localizedMessage ?: "Historical data unavailable"
+                            } finally {
+                                historicalLoading = false
+                            }
+                        }
+                    }
+                },
+                enabled = !historicalLoading,
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(if (historicalLoading) "Loading archive…" else "Load 5-day archive") }
+            historicalError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            historical?.let { archive ->
+                HorizontalDivider()
+                Text(archive.start_date + " to " + archive.end_date + " · " + archive.source,
+                    style = MaterialTheme.typography.labelMedium)
+                Text(archive.count.toString() + " detections", style = MaterialTheme.typography.headlineMedium)
+                Text(archive.high_confidence_count.toString() + " high-confidence · " + archive.frp_total_mw + " MW FRP",
+                    style = MaterialTheme.typography.bodyMedium)
+                Text(archive.note, style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
 
         summary?.let { data ->
