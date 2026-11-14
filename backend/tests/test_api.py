@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.routers import fires, analytics
+from app.services.firms import StaleCacheError
 
 client = TestClient(app)
 
@@ -81,3 +82,20 @@ def test_fires_endpoint_rejects_antimeridian_box():
         "west": 170, "south": -10, "east": -170, "north": 10
     })
     assert response.status_code == 400
+
+
+
+async def fake_stale_observations(*args, **kwargs):
+    raise StaleCacheError(SAMPLE, "2026-11-14T04:00:00+00:00")
+
+
+def test_fires_endpoint_marks_stale_fallback(monkeypatch):
+    monkeypatch.setattr(fires, "fetch_area_observations", fake_stale_observations)
+    response = client.get("/api/v1/fires", params={
+        "west": 68, "south": 6, "east": 98, "north": 37.5
+    })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data_status"] == "stale_cache"
+    assert body["cached_at"] == "2026-11-14T04:00:00+00:00"
+    assert body["count"] == 1
