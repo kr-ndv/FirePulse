@@ -14,14 +14,14 @@ android {
   targetSdk = 35
   versionCode = 1
   versionName = "0.1.0"
-  buildConfigField("String", "API_BASE_URL", "\"https://api.example.com/\"")
+  buildConfigField("String", "API_BASE_URL", "\"https://firepulse-gnp3qqg3p-krishnamdev127s-projects.vercel.app/\"")
  }
  buildTypes {
   debug {
    manifestPlaceholders["usesCleartextTraffic"] = "true"
    buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000/\"")
   }
-  release { isMinifyEnabled = false; buildConfigField("String", "API_BASE_URL", "\"https://api.example.com/\""); proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro") }
+  release { isMinifyEnabled = false; buildConfigField("String", "API_BASE_URL", "\"https://firepulse-gnp3qqg3p-krishnamdev127s-projects.vercel.app/\""); proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro") }
  }
  compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
  kotlinOptions { jvmTarget = "17" }
