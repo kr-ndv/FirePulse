@@ -21,13 +21,16 @@ import kotlinx.coroutines.withContext
    val result = withContext(Dispatchers.IO) { ApiClient.firePulseApi.getFires(68.0,6.0,98.0,37.5,5,"VIIRS_NOAA21_NRT") }
    count = result.count
    status = "NASA FIRMS data received · " + result.source
-  } catch (cancelled: kotlinx.coroutines.CancellationException) {\n   throw cancelled\n  } catch (e: Exception) {
+  } catch (cancelled: kotlinx.coroutines.CancellationException) {
+   throw cancelled
+  } catch (e: Exception) {
    status = "Could not load live observations. " + (e.localizedMessage ?: "Check API configuration.")
   } finally { loading = false }
  }
  Column(Modifier.fillMaxSize().padding(20.dp),verticalArrangement=Arrangement.spacedBy(18.dp)) {
   Text("FIREPULSE",style=MaterialTheme.typography.labelLarge,color=Ember)
-  Text("Fire intelligence,\nfrom space.",style=MaterialTheme.typography.headlineLarge)
+  Text("Fire intelligence,
+from space.",style=MaterialTheme.typography.headlineLarge)
   Text("Satellite-observed active fire activity, organized for clearer understanding.",color=MaterialTheme.colorScheme.onSurfaceVariant)
   FirePulseCard(Modifier.fillMaxWidth()) {
    Row(horizontalArrangement=Arrangement.spacedBy(10.dp)){Icon(Icons.Default.Public,null,tint=Ember);Text("Global observation explorer",style=MaterialTheme.typography.titleMedium)}
