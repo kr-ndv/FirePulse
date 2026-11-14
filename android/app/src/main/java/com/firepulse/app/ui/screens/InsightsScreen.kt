@@ -162,6 +162,8 @@ fun InsightsScreen() {
                                 }
                             } catch (cancelled: kotlinx.coroutines.CancellationException) {
                                 throw cancelled
+                            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                                throw cancelled
                             } catch (e: Exception) {
                                 historicalError = e.localizedMessage ?: "Historical data unavailable"
                             } finally {
