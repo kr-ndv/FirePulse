@@ -1,23 +1,33 @@
 # Deployment notes
 
+## Current Vercel Preview deployment
+
+The FirePulse FastAPI backend is deployed from `feature/android-foundation` in the Vercel Hobby project. The current branch preview is:
+
+- Base URL: `https://firepulse-gnp3qqg3p-krishnamdev127s-projects.vercel.app/`
+- Health: `/health`
+- Interactive API docs: `/docs`
+- Runtime region: Mumbai (`bom1`)
+
+The health endpoint and Swagger documentation have been opened successfully in a browser. This confirms that the FastAPI application is deployed and its routes are registered. It does **not** yet prove that a live NASA FIRMS query succeeds; that must be tested through a bounded `/api/v1/fires` request.
+
+The Android release BuildConfig now targets this Preview URL. Debug emulator builds continue to use `http://10.0.2.2:8000/`. The preview URL is suitable for integration testing only; configure a stable production domain and update Android `API_BASE_URL` before public distribution.
+
 ## Deploy the FastAPI backend to Vercel
 
 FirePulse includes a Vercel-compatible FastAPI entrypoint at `backend/index.py`. Vercel's Python runtime detects the exported FastAPI `app` and deploys the backend as a Function. The project is pinned to Python 3.12 through `backend/.python-version`.
 
-1. Sign in to Vercel and choose **Add New → Project**.
-2. Import the GitHub repository `kr-ndv/FirePulse`.
-3. Select the `feature/android-foundation` branch while testing this implementation. Do not change or merge `main`.
-4. In Project Settings / Configure Project, set **Root Directory** to `backend`. This is essential: the FastAPI entrypoint and `requirements.txt` are inside that directory.
-5. Leave the Framework Preset as **Other** or accept Vercel's FastAPI/Python detection. Do not add a custom Build Command or Output Directory.
-6. Add the environment variable `FIRMS_MAP_KEY` with the NASA FIRMS MAP_KEY value. Add it to the Preview environment for branch testing and Production only when ready. Do not put the key in GitHub, Android source, or a client-side variable.
-7. Deploy the project. Vercel may build automatically when the Git repository is connected; this is Vercel's deployment build, not a GitHub Actions workflow.
+1. Import the GitHub repository `kr-ndv/FirePulse` into Vercel.
+2. Select the `feature/android-foundation` branch while testing this implementation. Do not change or merge `main`.
+3. Set **Root Directory** to `backend`. The FastAPI entrypoint and `requirements.txt` are inside that directory.
+4. Leave the Framework Preset as **Other** or accept Vercel's FastAPI/Python detection. Do not add a custom Build Command or Output Directory.
+5. Add `FIRMS_MAP_KEY` as an encrypted environment variable for Preview. Add it to Production only when ready. Do not put the key in GitHub, Android source, or a client-side variable.
+6. Deploy the project. Vercel's deployment build is separate from GitHub Actions; this project does not require an Actions workflow.
 
-After deployment, copy the generated HTTPS deployment URL and verify:
+After deployment, verify:
 - `/health` returns a JSON status response.
 - `/docs` opens the FastAPI Swagger UI.
-- A bounded request to `/api/v1/fires` returns observations when `FIRMS_MAP_KEY` is configured.
-
-Only after the API is deployed and verified should the Android release API base URL be changed from its placeholder to the actual HTTPS URL (with trailing slash). Keep the debug emulator URL separate.
+- A bounded request to `/api/v1/fires` returns observations when `FIRMS_MAP_KEY` is valid and NASA FIRMS is available.
 
 ### Vercel runtime considerations
 
@@ -25,7 +35,7 @@ Vercel runs this FastAPI application as a serverless Function, not as a continuo
 
 The NASA FIRMS request timeout and Vercel Function duration must be compatible. If a request times out in deployment, inspect Vercel Function logs and reduce the requested workload or adjust supported function duration within the selected plan's limits. Do not claim that Vercel deployment is verified until the live endpoints have been checked.
 
-Vercel's Hobby plan is free for personal, non-commercial projects, but plan eligibility, usage limits, signup verification and payment checks are controlled by Vercel. This repository configuration cannot guarantee a no-card signup. Do not enter payment details if Vercel asks and you do not wish to provide them.
+Vercel's Hobby plan is intended for personal, non-commercial projects. Plan eligibility, usage limits, signup verification and payment checks are controlled by Vercel. This repository configuration cannot guarantee a no-card signup.
 
 ## Alternative: Render Blueprint
 
