@@ -170,6 +170,12 @@ fun InsightsScreen() {
                 Text(archive.start_date + " to " + archive.end_date + " · " + archive.source,
                     style = MaterialTheme.typography.labelMedium)
                 Text(archive.count.toString() + " detections", style = MaterialTheme.typography.headlineMedium)
+                Text(
+                    if (archive.data_status == "stale_cache") "Showing a cached archive response captured at " + (archive.cached_at ?: "an earlier time")
+                    else "Archive response received from NASA FIRMS",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Text(archive.high_confidence_count.toString() + " high-confidence · " + archive.frp_total_mw + " MW FRP",
                     style = MaterialTheme.typography.bodyMedium)
                 Text(archive.note, style = MaterialTheme.typography.bodySmall,
