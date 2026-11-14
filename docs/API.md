@@ -9,7 +9,8 @@ The public prototype API does not implement user authentication. Do not expose a
 - `GET /health` — liveness check.
 - `GET /api/v1/fires?west=...&south=...&east=...&north=...&days=1&source=VIIRS_SNPP_NRT` — normalized active-fire observations.
 - `GET /api/v1/fires/geojson?...same filters...` — GeoJSON FeatureCollection for map clients.
-- `GET /api/v1/summary?...same filters...` — total detections, per-day and per-satellite counts, summed FRP and high-confidence count.\n- `GET /api/v1/clusters?...same filters...&radius_km=5` — proximity-grouped hotspot clusters and an explicitly heuristic activity score. `radius_km` is limited to 0.5–25 km.
+- `GET /api/v1/summary?...same filters...` — total detections, per-day and per-satellite counts, summed FRP and high-confidence count.
+- `GET /api/v1/clusters?...same filters...&radius_km=5` — proximity-grouped hotspot clusters and an explicitly heuristic activity score. `radius_km` is limited to 0.5–25 km.
 
 ## Cache and freshness
 Successful FIRMS responses are cached in process memory for 60 seconds (maximum 128 request keys). If NASA FIRMS fails or returns a malformed/non-CSV response, the API may serve the last successful response for the same request if it is no older than `FIREPULSE_STALE_IF_ERROR_SECONDS` (default 900 seconds). Such responses carry `data_status: "stale_cache"` and an ISO-8601 UTC `cached_at` timestamp. Fresh upstream responses carry `data_status: "live"` and `cached_at: null`. Set the stale window to 0 to disable this fallback. Missing credentials do not trigger stale fallback.
