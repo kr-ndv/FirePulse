@@ -13,6 +13,7 @@ import com.firepulse.app.data.local.toEntity
 import com.firepulse.app.data.local.toObservation
 import com.firepulse.app.data.remote.ApiClient
 import com.firepulse.app.data.remote.FireObservation
+import com.firepulse.app.data.remote.FireCluster
 import com.firepulse.app.ui.components.FireActivityMap
 import com.firepulse.app.ui.components.FirePulseCard
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +25,8 @@ import kotlinx.coroutines.withContext
  var source by remember { mutableStateOf("VIIRS_SNPP_NRT") }
  var days by remember { mutableIntStateOf(1) }
  var observations by remember { mutableStateOf<List<FireObservation>>(emptyList()) }
+ var clusters by remember { mutableStateOf<List<FireCluster>>(emptyList()) }
+ var clusterError by remember { mutableStateOf<String?>(null) }
  var loading by remember { mutableStateOf(false) }
  var error by remember { mutableStateOf<String?>(null) }
  var expanded by remember { mutableStateOf(false) }
@@ -48,6 +51,16 @@ import kotlinx.coroutines.withContext
    apiDataStatus=response.data_status ?: "live"
    cachedAt=response.cached_at
    showingCache=apiDataStatus == "stale_cache"
+   try {
+    val clusterResponse=withContext(Dispatchers.IO) {
+     ApiClient.firePulseApi.getClusters(68.0,6.0,98.0,37.5,days,source,5.0)
+    }
+    clusters=clusterResponse.clusters
+    clusterError=null
+   } catch(clusterException:Exception) {
+    clusters=emptyList()
+    clusterError=clusterException.localizedMessage ?: "Cluster overlay unavailable"
+   }
    if(apiDataStatus=="live") {
     withContext(Dispatchers.IO) {
      val timestamp=System.currentTimeMillis()
@@ -88,7 +101,13 @@ import kotlinx.coroutines.withContext
   }
   if(loading) LinearProgressIndicator(Modifier.fillMaxWidth())
   error?.let { Text(it,color=if(showingCache) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error) }
-  FireActivityMap(observations=observations)
+  FireActivityMap(observations=observations,clusters=clusters)
+  Row(horizontalArrangement=Arrangement.spacedBy(14.dp)) {
+   Text("● Satellite detections",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+   Text("● Activity clusters",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.tertiary)
+  }
+  clusterError?.let { Text("Cluster overlay unavailable: $it",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant) }
+  if(clusters.isNotEmpty()) Text("${clusters.size} potential activity clusters · 5 km grouping radius",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
   Text("Map data © OpenFreeMap · © OpenStreetMap contributors",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
   Text("Recent detections",style=MaterialTheme.typography.titleLarge)
   if(observations.isEmpty() && !loading && error==null) Text("No detections returned for this area and time window.")
