@@ -99,3 +99,18 @@ def test_fires_endpoint_marks_stale_fallback(monkeypatch):
     assert body["data_status"] == "stale_cache"
     assert body["cached_at"] == "2026-11-14T04:00:00+00:00"
     assert body["count"] == 1
+
+
+def test_clusters_endpoint_returns_ranked_clusters(monkeypatch):
+    monkeypatch.setattr(analytics, "fetch_area_observations", fake_observations)
+    response = client.get("/api/v1/clusters", params={
+        "west": 68, "south": 6, "east": 98, "north": 37.5,
+        "days": 5, "radius_km": 5
+    })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["detection_count"] == 1
+    assert body["cluster_count"] == 1
+    assert body["clusters"][0]["detection_count"] == 1
+    assert body["clusters"][0]["severity_label"] in {"low", "moderate", "elevated", "high"}
+    assert "heuristic" in body["scoring_method"].lower()
