@@ -4,14 +4,6 @@ run-name: Build FirePulse APK (${{ github.ref_name }})
 
 on:
   workflow_dispatch:
-    inputs:
-      build_type:
-        description: APK build type
-        required: true
-        type: choice
-        options:
-          - debug
-        default: debug
 
 permissions:
   contents: read
