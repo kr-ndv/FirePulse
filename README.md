@@ -29,7 +29,7 @@ uvicorn app.main:app --reload
 - API docs: `http://localhost:8000/docs`
 - Fire observations: `/api/v1/fires`
 - GeoJSON map feed: `/api/v1/fires/geojson`
-- Analytics summary: `/api/v1/summary`
+- Analytics summary: `/api/v1/summary`\n- Potential fire-activity clusters: `/api/v1/clusters` (experimental heuristic, not an official severity rating)
 
 See [API documentation](docs/API.md) and [deployment guide](docs/DEPLOYMENT.md).
 
@@ -49,7 +49,11 @@ The API has a process-local sliding-window rate limit (default 120 requests per 
 - [VIIRS active fire product](https://viirsland.gsfc.nasa.gov/Products/NASA/Fire.html)
 
 ## Project status
-The repository includes the Android app shell, navigation and theme, Retrofit data client, MapLibre map layer for FIRMS detections, Room-based offline observation snapshots, periodic WorkManager refresh, FastAPI observations/GeoJSON/summary endpoints, a short-lived in-memory FIRMS response cache with stale-if-error metadata, FIRMS CSV validation, request rate limiting, bounding-box limits, upstream concurrency controls, deployment blueprint and backend tests. All source changes still require Gradle sync/build, backend test execution and device verification. The API distinguishes live responses from a bounded stale-server fallback (default maximum age 15 minutes); Explore also distinguishes stale server data from its offline Room snapshot. No live FIRMS request or deployment has been performed. Production authentication, distributed quotas, monitoring and deployment remain outstanding. No GitHub Actions workflow is required or used.
+The repository includes the Android app shell, navigation and theme, Retrofit data client, MapLibre map layer for FIRMS detections, Room-based offline observation snapshots, periodic WorkManager refresh, FastAPI observations/GeoJSON/summary/clustering endpoints, a short-lived in-memory FIRMS response cache with stale-if-error metadata, FIRMS CSV validation, request rate limiting, bounding-box limits, upstream concurrency controls, deployment blueprint and backend tests. All source changes still require Gradle sync/build, backend test execution and device verification. The API distinguishes live responses from a bounded stale-server fallback (default maximum age 15 minutes); Explore also distinguishes stale server data from its offline Room snapshot. No live FIRMS request or deployment has been performed. Production authentication, distributed quotas, monitoring and deployment remain outstanding. No GitHub Actions workflow is required or used.
 
 ## License
 MIT. See [LICENSE](LICENSE).
+
+
+## Experimental hotspot clustering
+FirePulse can group nearby detections into potential activity clusters and rank them using a documented heuristic based on detection count, summed FRP and high-confidence share. The default neighborhood radius is 5 km. Insights displays the highest-ranked clusters and their coordinates. These groupings are not verified incidents, fire perimeters, official danger ratings or emergency alerts. See [data methodology](docs/DATA_METHODOLOGY.md) for the exact scoring formula and limitations.
