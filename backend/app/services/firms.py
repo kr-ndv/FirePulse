@@ -1,9 +1,15 @@
 import csv
 import io
 import os
+import time
+import asyncio
 import httpx
 
 ALLOWED_SOURCES = {"MODIS_NRT", "VIIRS_SNPP_NRT", "VIIRS_NOAA20_NRT", "VIIRS_NOAA21_NRT"}
+_CACHE_TTL_SECONDS = 60
+_CACHE_MAX_ENTRIES = 128
+_cache: dict[tuple, tuple[float, list[dict]]] = {}
+_cache_lock = asyncio.Lock()
 
 async def fetch_area_observations(source: str, west: float, south: float,
                                   east: float, north: float, days: int) -> list[dict]:
@@ -15,6 +21,15 @@ async def fetch_area_observations(source: str, west: float, south: float,
         raise ValueError("west and east must differ")
     if not 1 <= days <= 5:
         raise ValueError("days must be between 1 and 5")
+    cache_key = (source, west, south, east, north, days)
+    now = time.monotonic()
+    async with _cache_lock:
+        cached = _cache.get(cache_key)
+        if cached and now - cached[0] < _CACHE_TTL_SECONDS:
+            return [dict(item) for item in cached[1]]
+        if cached:
+            _cache.pop(cache_key, None)
+
     map_key = os.getenv("FIRMS_MAP_KEY")
     if not map_key:
         raise RuntimeError("FIRMS_MAP_KEY is not configured on the server")
@@ -44,7 +59,12 @@ async def fetch_area_observations(source: str, west: float, south: float,
             "brightness": _num(row.get("bright_ti4") or row.get("brightness")),
             "daynight": row.get("daynight"),
         })
-    return observations
+    async with _cache_lock:
+        if len(_cache) >= _CACHE_MAX_ENTRIES:
+            oldest_key = min(_cache, key=lambda key: _cache[key][0])
+            _cache.pop(oldest_key, None)
+        _cache[cache_key] = (time.monotonic(), observations)
+    return [dict(item) for item in observations]
 
 def _num(value):
     try:
