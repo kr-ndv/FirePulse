@@ -54,7 +54,7 @@ class FireRefreshWorker(
 
     companion object {
         const val UNIQUE_WORK_NAME = "firepulse-periodic-fire-refresh"
-        const val DEFAULT_SOURCE = "VIIRS_SNPP_NRT"
+        const val DEFAULT_SOURCE = "VIIRS_NOAA21_NRT"
         const val DEFAULT_DAYS = 5
 
         private const val INDIA_WEST = 68.0
