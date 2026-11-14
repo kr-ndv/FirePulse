@@ -75,7 +75,7 @@ async def fetch_area_observations(source: str, west: float, south: float,
             ) as client:
                 response = await client.get(url)
                 response.raise_for_status()
-        body = response.text
+        body = response.text.lstrip("\ufeff")
         # FIRMS should return CSV. HTML/proxy error pages and JSON error payloads
         # must never be interpreted as a successful empty fire dataset.
         if not body.strip() or body.lstrip().startswith(("<", "{", "[")):
