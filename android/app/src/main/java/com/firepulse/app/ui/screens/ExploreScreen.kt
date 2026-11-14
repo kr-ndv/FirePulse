@@ -36,6 +36,7 @@ import kotlinx.coroutines.withContext
 
  LaunchedEffect(source,days) {
   loading=true; error=null; showingCache=false
+  clusters=emptyList(); clusterError=null
   val cached=withContext(Dispatchers.IO) { dao.getSnapshot(source,days).map { it.toObservation() } }
   if(cached.isNotEmpty()) {
    observations=cached
