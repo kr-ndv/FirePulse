@@ -8,14 +8,16 @@ data class FireObservation(
  val confidence:String?,val frp:Double?,val brightness:Double?,val daynight:String?
 )
 data class FireObservationsResponse(
- val source:String,val count:Int,val retrieved_on:String?,val observations:List<FireObservation>
+ val source:String,val count:Int,val retrieved_on:String?,val observations:List<FireObservation>,
+ val data_status:String? = "live",val cached_at:String? = null
 )
 data class DailyFireCount(val date:String,val detections:Int)
 data class SatelliteFireCount(val satellite:String,val detections:Int)
 data class FireSummaryResponse(
  val source:String,val days:Int,val count:Int,val retrieved_on:String,
  val by_day:List<DailyFireCount>,val by_satellite:List<SatelliteFireCount>,
- val frp_total_mw:Double,val high_confidence_count:Int
+ val frp_total_mw:Double,val high_confidence_count:Int,
+ val data_status:String? = "live",val cached_at:String? = null
 )
 interface FirePulseApi {
  @GET("api/v1/fires")
