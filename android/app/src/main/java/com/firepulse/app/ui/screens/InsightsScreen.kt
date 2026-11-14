@@ -1,6 +1,8 @@
 package com.firepulse.app.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -31,22 +33,23 @@ fun InsightsScreen() {
             summary = withContext(Dispatchers.IO) {
                 ApiClient.firePulseApi.getSummary(68.0, 6.0, 98.0, 37.5, 5, "VIIRS_SNPP_NRT")
             }
-            try {
-                clusters = withContext(Dispatchers.IO) {
-                    ApiClient.firePulseApi.getClusters(68.0, 6.0, 98.0, 37.5, 5, "VIIRS_SNPP_NRT", 5.0)
-                }
-            } catch (clusterException: Exception) {
-                clusterError = clusterException.localizedMessage ?: "Unable to load hotspot clusters"
-            }
         } catch (e: Exception) {
             error = e.localizedMessage ?: "Unable to load analytics"
+        }
+        try {
+            clusters = withContext(Dispatchers.IO) {
+                ApiClient.firePulseApi.getClusters(68.0, 6.0, 98.0, 37.5, 5, "VIIRS_SNPP_NRT", 5.0)
+            }
+        } catch (clusterException: Exception) {
+            clusterError = clusterException.localizedMessage ?: "Unable to load hotspot clusters"
+        }
         } finally {
             loading = false
         }
     }
 
     Column(
-        Modifier.fillMaxSize().padding(20.dp),
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
