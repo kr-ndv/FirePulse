@@ -46,7 +46,9 @@ async def fires_geojson(
         raise HTTPException(status_code=400, detail="Invalid bounding box")
     try:
         rows = await fetch_area_observations(source, west, south, east, north, days)
-    except (ValueError, RuntimeError) as exc:
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     features = []
     for row in rows:
