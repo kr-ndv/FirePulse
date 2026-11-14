@@ -2,6 +2,7 @@ from collections import Counter
 from datetime import date
 from fastapi import APIRouter, HTTPException, Query
 from app.services.firms import StaleCacheError, fetch_area_observations
+from app.services.clustering import cluster_observations
 
 router = APIRouter(tags=["analytics"])
 
@@ -67,4 +68,35 @@ async def fires_geojson(
     return {
         "type": "FeatureCollection", "features": features, "source": source,
         "count": len(features), "data_status": data_status, "cached_at": cached_at
+    }
+
+
+
+@router.get("/clusters")
+async def fire_clusters(
+    west: float = Query(..., ge=-180, le=180),
+    south: float = Query(..., ge=-90, le=90),
+    east: float = Query(..., ge=-180, le=180),
+    north: float = Query(..., ge=-90, le=90),
+    days: int = Query(1, ge=1, le=5),
+    source: str = Query("VIIRS_SNPP_NRT"),
+    radius_km: float = Query(5.0, ge=0.5, le=25.0),
+):
+    if south >= north or west >= east:
+        raise HTTPException(status_code=400, detail="Invalid bounding box")
+    rows, data_status, cached_at = await _load_rows(source, west, south, east, north, days)
+    try:
+        clusters = cluster_observations(rows, radius_km=radius_km)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {
+        "source": source,
+        "days": days,
+        "radius_km": radius_km,
+        "detection_count": len(rows),
+        "cluster_count": len(clusters),
+        "data_status": data_status,
+        "cached_at": cached_at,
+        "scoring_method": "FirePulse heuristic v1: detection count 40%, summed FRP 40%, high-confidence share 20%",
+        "clusters": clusters,
     }
