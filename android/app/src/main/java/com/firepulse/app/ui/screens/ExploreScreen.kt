@@ -38,7 +38,9 @@ import kotlinx.coroutines.withContext
    }
   }
   Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-   listOf(1,2,3,5).forEach { value -> FilterChip(selected=days==value,onClick={days=value},label={Text(value.toString()+" day"+if(value>1)"s" else "")}) }
+   listOf(1,2,3,5).forEach { value ->
+    FilterChip(selected=days==value,onClick={days=value},label={Text(value.toString()+" day"+(if(value>1) "s" else ""))})
+   }
   }
   if(loading) LinearProgressIndicator(Modifier.fillMaxWidth())
   error?.let { Text("Could not load observations: "+it,color=MaterialTheme.colorScheme.error) }
