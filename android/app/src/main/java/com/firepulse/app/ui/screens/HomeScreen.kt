@@ -18,10 +18,10 @@ import kotlinx.coroutines.withContext
  var status by remember { mutableStateOf("Connecting to FirePulse API…") }
  LaunchedEffect(Unit) {
   try {
-   val result = withContext(Dispatchers.IO) { ApiClient.firePulseApi.getFires(68.0,6.0,98.0,37.5,1,"VIIRS_SNPP_NRT") }
+   val result = withContext(Dispatchers.IO) { ApiClient.firePulseApi.getFires(68.0,6.0,98.0,37.5,5,"VIIRS_NOAA21_NRT") }
    count = result.count
    status = "NASA FIRMS data received · " + result.source
-  } catch (e: Exception) {
+  } catch (cancelled: kotlinx.coroutines.CancellationException) {\n   throw cancelled\n  } catch (e: Exception) {
    status = "Could not load live observations. " + (e.localizedMessage ?: "Check API configuration.")
   } finally { loading = false }
  }
@@ -36,7 +36,7 @@ import kotlinx.coroutines.withContext
   }
   FirePulseCard(Modifier.fillMaxWidth()) {
    Row(horizontalArrangement=Arrangement.spacedBy(10.dp)){Icon(Icons.Default.LocalFireDepartment,null,tint=Ember);Text("Latest observation snapshot",style=MaterialTheme.typography.titleMedium)}
-   Text(if(loading) "Loading satellite observations…" else count.toString() + " detections in the latest VIIRS SNPP request",style=MaterialTheme.typography.headlineSmall)
+   Text(if(loading) "Loading satellite observations…" else count.toString() + " detections in the latest 5-day NOAA-21 request",style=MaterialTheme.typography.headlineSmall)
    Text(status,color=MaterialTheme.colorScheme.onSurfaceVariant,style=MaterialTheme.typography.bodySmall)
   }
   Spacer(Modifier.weight(1f))
