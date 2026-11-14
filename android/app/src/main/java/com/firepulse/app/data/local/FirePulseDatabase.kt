@@ -38,15 +38,15 @@ interface FireObservationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(items: List<FireObservationEntity>)
 
-    @Query("DELETE FROM fire_observations")
-    suspend fun clear()
+    @Query("DELETE FROM fire_observations WHERE source = :source AND requestedDays = :days")
+    suspend fun clearSnapshot(source: String, days: Int)
 
     @Query("DELETE FROM fire_observations WHERE cachedAt < :cutoff")
     suspend fun deleteOlderThan(cutoff: Long)
 
     @Transaction
-    suspend fun replaceSnapshot(items: List<FireObservationEntity>) {
-        clear()
+    suspend fun replaceSnapshot(source: String, days: Int, items: List<FireObservationEntity>) {
+        clearSnapshot(source, days)
         if (items.isNotEmpty()) insertAll(items)
     }
 }
