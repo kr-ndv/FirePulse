@@ -46,7 +46,7 @@ fun FireActivityMap(
         MapLibre.getInstance(context.applicationContext)
         MapView(context).also { it.onCreate(null) }
     }
-    var mapInstance: MapLibreMap? = remember { null }
+    val mapInstance = remember { androidx.compose.runtime.mutableStateOf<MapLibreMap?>(null) }
     var styleReady by remember { androidx.compose.runtime.mutableStateOf(false) }
 
     DisposableEffect(mapView, lifecycleOwner) {
@@ -71,9 +71,9 @@ fun FireActivityMap(
         modifier = modifier.fillMaxWidth().height(420.dp),
         factory = { mapView },
         update = { view ->
-            if (mapInstance == null) {
+            if (mapInstance.value == null) {
                 view.getMapAsync { map ->
-                    mapInstance = map
+                    mapInstance.value = map
                     map.cameraPosition = CameraPosition.Builder()
                         .target(initialTarget)
                         .zoom(initialZoom)
@@ -112,7 +112,7 @@ fun FireActivityMap(
                 }
             }
             val collection = FeatureCollection.fromFeatures(features)
-            mapInstance?.style?.getSourceAs<GeoJsonSource>(FIRE_SOURCE_ID)?.setGeoJson(collection)
+            mapInstance.value?.style?.getSourceAs<GeoJsonSource>(FIRE_SOURCE_ID)?.setGeoJson(collection)
         }
     }
 }
