@@ -2,6 +2,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
+import logging
+
+# httpx logs request URLs at INFO; NASA FIRMS embeds MAP_KEY in the path.
+# Suppress those request-line logs so credentials never enter Vercel runtime logs.
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
