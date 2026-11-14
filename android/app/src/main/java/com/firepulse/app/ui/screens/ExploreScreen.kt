@@ -37,7 +37,7 @@ private val exploreAreas = listOf(
  var source by remember { mutableStateOf("VIIRS_NOAA21_NRT") }
  var selectedArea by remember { mutableStateOf(exploreAreas.first()) }
  var areaMenuExpanded by remember { mutableStateOf(false) }
- var days by remember { mutableIntStateOf(1) }
+ var days by remember { mutableIntStateOf(5) }
  var observations by remember { mutableStateOf<List<FireObservation>>(emptyList()) }
  var clusters by remember { mutableStateOf<List<FireCluster>>(emptyList()) }
  var clusterError by remember { mutableStateOf<String?>(null) }
@@ -57,7 +57,10 @@ private val exploreAreas = listOf(
   if(cached.isNotEmpty()) {
    observations=cached
    apiDataStatus="offline_cache"
-   cachedAt=null
+   val snapshotTime=withContext(Dispatchers.IO) { dao.getSnapshotCachedAt(source,days) }
+   cachedAt=snapshotTime?.let {
+    java.text.DateFormat.getDateTimeInstance().format(java.util.Date(it))
+   }
    showingCache=true
   } else {
    observations=emptyList()
