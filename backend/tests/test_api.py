@@ -114,3 +114,41 @@ def test_clusters_endpoint_returns_ranked_clusters(monkeypatch):
     assert body["clusters"][0]["detection_count"] == 1
     assert body["clusters"][0]["severity_label"] in {"low", "moderate", "elevated", "high"}
     assert "heuristic" in body["scoring_method"].lower()
+
+
+
+def test_historical_summary_uses_explicit_archive_date_and_source(monkeypatch):
+    captured = {}
+
+    async def fake_historical(source, west, south, east, north, days, start_date):
+        captured.update({
+            "source": source, "days": days, "start_date": start_date,
+            "bounds": (west, south, east, north),
+        })
+        return SAMPLE
+
+    monkeypatch.setattr(analytics, "fetch_area_observations", fake_historical)
+    response = client.get("/api/v1/history", params={
+        "west": 68, "south": 6, "east": 98, "north": 37.5,
+        "start_date": "2026-10-01", "days": 5, "source": "VIIRS_SNPP_SP",
+    })
+    assert response.status_code == 200
+    body = response.json()
+    assert captured["source"] == "VIIRS_SNPP_SP"
+    assert captured["start_date"] == "2026-10-01"
+    assert captured["days"] == 5
+    assert body["start_date"] == "2026-10-01"
+    assert body["end_date"] == "2026-10-05"
+    assert body["count"] == 1
+    assert body["frp_total_mw"] == 12.4
+
+
+def test_historical_summary_rejects_future_date():
+    from datetime import date, timedelta
+
+    future = (date.today() + timedelta(days=1)).isoformat()
+    response = client.get("/api/v1/history", params={
+        "west": 68, "south": 6, "east": 98, "north": 37.5,
+        "start_date": future, "days": 5, "source": "VIIRS_SNPP_SP",
+    })
+    assert response.status_code == 400
