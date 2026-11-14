@@ -18,7 +18,9 @@ async def summary(
         raise HTTPException(status_code=400, detail="Invalid bounding box")
     try:
         rows = await fetch_area_observations(source, west, south, east, north, days)
-    except (ValueError, RuntimeError) as exc:
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     by_day = Counter(r["acquisition_date"] for r in rows if r.get("acquisition_date"))
     by_satellite = Counter(r.get("satellite") or "Unknown" for r in rows)
