@@ -27,7 +27,7 @@ import kotlinx.coroutines.withContext
  var loading by remember { mutableStateOf(false) }
  var error by remember { mutableStateOf<String?>(null) }
  var expanded by remember { mutableStateOf(false) }
- var showingCache by remember { mutableStateOf(false) }
+ var showingCache by remember { mutableStateOf(false) }\n var apiDataStatus by remember { mutableStateOf("live") }\n var cachedAt by remember { mutableStateOf<String?>(null) }
 
  LaunchedEffect(source,days) {
   loading=true; error=null; showingCache=false
@@ -73,7 +73,7 @@ import kotlinx.coroutines.withContext
    Text("India fire activity",style=MaterialTheme.typography.titleMedium)
    Text(observations.size.toString()+" satellite detections",style=MaterialTheme.typography.headlineMedium)
    Text("Feed: "+source+" · Window: "+days+" day(s)",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
-   if(showingCache) Text("Offline cache",style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.tertiary)
+   if(showingCache) Text("Server snapshot · NASA feed unavailable",style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.tertiary)\n   else if(!loading && !showingCache && error==null) Text("Live response",style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.primary)\n   cachedAt?.let { Text("Snapshot captured: "+it,style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant) }
   }
   if(loading) LinearProgressIndicator(Modifier.fillMaxWidth())
   error?.let { Text(it,color=if(showingCache) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error) }
