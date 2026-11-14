@@ -34,7 +34,7 @@ private val exploreAreas = listOf(
 @Composable fun ExploreScreen() {
  val context=LocalContext.current
  val dao=remember { FirePulseDatabase.getInstance(context).fireObservationDao() }
- var source by remember { mutableStateOf("VIIRS_SNPP_NRT") }
+ var source by remember { mutableStateOf("VIIRS_NOAA21_NRT") }
  var selectedArea by remember { mutableStateOf(exploreAreas.first()) }
  var areaMenuExpanded by remember { mutableStateOf(false) }
  var days by remember { mutableIntStateOf(1) }
@@ -115,7 +115,7 @@ private val exploreAreas = listOf(
   ExposedDropdownMenuBox(expanded=expanded,onExpandedChange={expanded=it}) {
    OutlinedTextField(value=source,onValueChange={},readOnly=true,label={Text("Satellite feed")},modifier=Modifier.fillMaxWidth().menuAnchor())
    ExposedDropdownMenu(expanded=expanded,onDismissRequest={expanded=false}) {
-    listOf("VIIRS_SNPP_NRT","VIIRS_NOAA20_NRT","VIIRS_NOAA21_NRT","MODIS_NRT").forEach { item ->
+    listOf("VIIRS_NOAA21_NRT","VIIRS_NOAA20_NRT","VIIRS_NOAA21_NRT","MODIS_NRT").forEach { item ->
      DropdownMenuItem(text={Text(item)},onClick={source=item;expanded=false})
     }
    }
