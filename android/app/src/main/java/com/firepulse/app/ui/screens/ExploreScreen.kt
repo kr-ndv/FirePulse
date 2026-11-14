@@ -6,7 +6,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.firepulse.app.data.local.FirePulseDatabase
+import com.firepulse.app.data.local.toEntity
+import com.firepulse.app.data.local.toObservation
 import com.firepulse.app.data.remote.ApiClient
 import com.firepulse.app.data.remote.FireObservation
 import com.firepulse.app.ui.components.FireActivityMap
@@ -15,22 +19,37 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable fun ExploreScreen() {
+ val context=LocalContext.current
+ val dao=remember { FirePulseDatabase.getInstance(context).fireObservationDao() }
  var source by remember { mutableStateOf("VIIRS_SNPP_NRT") }
  var days by remember { mutableIntStateOf(1) }
  var observations by remember { mutableStateOf<List<FireObservation>>(emptyList()) }
  var loading by remember { mutableStateOf(false) }
  var error by remember { mutableStateOf<String?>(null) }
  var expanded by remember { mutableStateOf(false) }
+ var showingCache by remember { mutableStateOf(false) }
 
  LaunchedEffect(source,days) {
-  loading=true; error=null
+  loading=true; error=null; showingCache=false
+  val cached=withContext(Dispatchers.IO) { dao.getRecent().map { it.toObservation() } }
+  if(cached.isNotEmpty()) {
+   observations=cached
+   showingCache=true
+  }
   try {
    val response=withContext(Dispatchers.IO) {
     ApiClient.firePulseApi.getFires(68.0,6.0,98.0,37.5,days,source)
    }
    observations=response.observations
+   showingCache=false
+   withContext(Dispatchers.IO) {
+    val timestamp=System.currentTimeMillis()
+    dao.replaceSnapshot(response.observations.map { it.toEntity(timestamp) })
+    dao.deleteOlderThan(timestamp-30L*24L*60L*60L*1000L)
+   }
   } catch(e:Exception) {
-   error=e.localizedMessage ?: "Unable to reach FirePulse API"
+   error=if(cached.isNotEmpty()) "Showing saved observations. Live refresh failed: "+(e.localizedMessage ?: "network unavailable")
+         else e.localizedMessage ?: "Unable to reach FirePulse API"
   } finally { loading=false }
  }
 
@@ -54,9 +73,10 @@ import kotlinx.coroutines.withContext
    Text("India fire activity",style=MaterialTheme.typography.titleMedium)
    Text(observations.size.toString()+" satellite detections",style=MaterialTheme.typography.headlineMedium)
    Text("Feed: "+source+" · Window: "+days+" day(s)",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+   if(showingCache) Text("Offline cache",style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.tertiary)
   }
   if(loading) LinearProgressIndicator(Modifier.fillMaxWidth())
-  error?.let { Text("Could not load observations: "+it,color=MaterialTheme.colorScheme.error) }
+  error?.let { Text(it,color=if(showingCache) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error) }
   FireActivityMap(observations=observations)
   Text("Map data © OpenFreeMap · © OpenStreetMap contributors",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
   Text("Recent detections",style=MaterialTheme.typography.titleLarge)
