@@ -115,7 +115,7 @@ private val exploreAreas = listOf(
   ExposedDropdownMenuBox(expanded=expanded,onExpandedChange={expanded=it}) {
    OutlinedTextField(value=source,onValueChange={},readOnly=true,label={Text("Satellite feed")},modifier=Modifier.fillMaxWidth().menuAnchor())
    ExposedDropdownMenu(expanded=expanded,onDismissRequest={expanded=false}) {
-    listOf("VIIRS_NOAA21_NRT","VIIRS_NOAA20_NRT","VIIRS_NOAA21_NRT","MODIS_NRT").forEach { item ->
+    listOf("VIIRS_NOAA21_NRT","VIIRS_NOAA20_NRT","MODIS_NRT").forEach { item ->
      DropdownMenuItem(text={Text(item)},onClick={source=item;expanded=false})
     }
    }
