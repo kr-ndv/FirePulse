@@ -1,6 +1,5 @@
 package com.firepulse.app.ui.components
 
-import android.content.Context
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -9,7 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
@@ -80,7 +79,7 @@ fun FireActivityMap(
                         .build()
                     map.setStyle(MAP_STYLE) { style ->
                         if (style.getSource(FIRE_SOURCE_ID) == null) {
-                            style.addSource(GeoJsonSource(FIRE_SOURCE_ID, FeatureCollection.fromFeatures(arrayOf())))
+                            style.addSource(GeoJsonSource(FIRE_SOURCE_ID, FeatureCollection.fromFeatures(emptyArray<Feature>())))
                         }
                         if (style.getLayer(FIRE_LAYER_ID) == null) {
                             style.addLayer(
