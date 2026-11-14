@@ -3,11 +3,11 @@ import io
 import os
 import time
 import asyncio
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 import httpx
 
-ALLOWED_SOURCES = {"MODIS_NRT", "VIIRS_SNPP_NRT", "VIIRS_NOAA20_NRT", "VIIRS_NOAA21_NRT"}
+ALLOWED_SOURCES = {"MODIS_NRT", "VIIRS_SNPP_NRT", "VIIRS_NOAA20_NRT", "VIIRS_NOAA21_NRT", "MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_SP"}
 _CACHE_TTL_SECONDS = 60
 _CACHE_MAX_ENTRIES = 128
 _STALE_IF_ERROR_SECONDS = max(0, int(os.getenv("FIREPULSE_STALE_IF_ERROR_SECONDS", "900")))
@@ -37,7 +37,7 @@ def _num(value):
 
 
 async def fetch_area_observations(source: str, west: float, south: float,
-                                  east: float, north: float, days: int) -> list[dict]:
+                                  east: float, north: float, days: int, start_date: str | None = None) -> list[dict]:
     if source not in ALLOWED_SOURCES:
         raise ValueError(f"Unsupported FIRMS source: {source}")
     if not (-180 <= west <= 180 and -180 <= east <= 180 and -90 <= south < north <= 90):
@@ -49,7 +49,7 @@ async def fetch_area_observations(source: str, west: float, south: float,
     if not 1 <= days <= 5:
         raise ValueError("days must be between 1 and 5")
 
-    cache_key = (source, west, south, east, north, days)
+    if start_date is not None:\n        try:\n            requested_date = date.fromisoformat(start_date)\n        except ValueError as exc:\n            raise ValueError("start_date must use YYYY-MM-DD format") from exc\n        if requested_date > date.today():\n            raise ValueError("start_date cannot be in the future")\n\n    cache_key = (source, west, south, east, north, days, start_date)
     now = time.monotonic()
     cached = None
     async with _cache_lock:
@@ -65,7 +65,7 @@ async def fetch_area_observations(source: str, west: float, south: float,
         raise RuntimeError("FIRMS_MAP_KEY is not configured on the server")
     base = os.getenv("FIRMS_BASE_URL", "https://firms.modaps.eosdis.nasa.gov/api/area/csv").rstrip("/")
     area = f"{west},{south},{east},{north}"
-    url = f"{base}/{map_key}/{source}/{area}/{days}"
+    url = f"{base}/{map_key}/{source}/{area}/{days}"\n    if start_date is not None:\n        url = f"{url}/{start_date}"
 
     try:
         async with _upstream_semaphore:
