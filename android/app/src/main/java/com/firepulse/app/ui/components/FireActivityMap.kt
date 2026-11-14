@@ -1,5 +1,7 @@
 package com.firepulse.app.ui.components
 
+import android.content.ComponentCallbacks2
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -61,11 +63,18 @@ fun FireActivityMap(
                 Lifecycle.Event.ON_RESUME -> mapView.onResume()
                 Lifecycle.Event.ON_PAUSE -> mapView.onPause()
                 Lifecycle.Event.ON_STOP -> mapView.onStop()
-                Lifecycle.Event.ON_LOW_MEMORY -> mapView.onLowMemory()
                 else -> Unit
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
+        val memoryCallbacks = object : ComponentCallbacks2 {
+            override fun onConfigurationChanged(newConfig: Configuration) = Unit
+            override fun onLowMemory() = mapView.onLowMemory()
+            override fun onTrimMemory(level: Int) {
+                if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) mapView.onLowMemory()
+            }
+        }
+        context.applicationContext.registerComponentCallbacks(memoryCallbacks)
 
         // A composable can enter after the Activity is already STARTED/RESUMED.
         // Lifecycle observers do not replay the current state, so synchronize
@@ -79,6 +88,7 @@ fun FireActivityMap(
 
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+            context.applicationContext.unregisterComponentCallbacks(memoryCallbacks)
             if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
                 mapView.onPause()
             }
