@@ -47,7 +47,9 @@ fun InsightsScreen() {
             clusters = withContext(Dispatchers.IO) {
                 ApiClient.firePulseApi.getClusters(68.0, 6.0, 98.0, 37.5, 5, "VIIRS_NOAA21_NRT", 5.0)
             }
-        } catch (cancelled: kotlinx.coroutines.CancellationException) {\n            throw cancelled\n        } catch (clusterException: Exception) {
+        } catch (cancelled: kotlinx.coroutines.CancellationException) {
+            throw cancelled
+        } catch (clusterException: Exception) {
             clusterError = clusterException.localizedMessage ?: "Unable to load hotspot clusters"
         }
         loading = false
