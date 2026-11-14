@@ -7,7 +7,7 @@ FirePulse is an Android-first open-source project that organizes NASA MODIS and 
 > A hotspot is a satellite thermal-anomaly detection. It is not a confirmed fire perimeter, ground-truth incident, or emergency alert.
 
 ## Repository
-- `android/` — Kotlin, Jetpack Compose and Material 3 Android client.
+- `android/` — Kotlin, Jetpack Compose, Material 3 and MapLibre Native Android client.
 - `backend/` — FastAPI service; NASA FIRMS credentials stay server-side.
 - `docs/` — architecture, API and deployment notes.
 
@@ -43,7 +43,7 @@ Open `android/` in Android Studio, sync Gradle and run the app. Debug emulator t
 - [VIIRS active fire product](https://viirsland.gsfc.nasa.gov/Products/NASA/Fire.html)
 
 ## Project status
-The repository now includes the Android app shell, initial navigation and theme, Retrofit API contract, FastAPI observations endpoint, GeoJSON feed, summary analytics, deployment blueprint and basic backend tests. A live rendered map, full client-side data flow and persistent offline cache still require integration and device verification. No CI workflow is needed for these changes.
+The repository includes the Android app shell, navigation and theme, Retrofit data client, MapLibre map layer for FIRMS detections, FastAPI observations/GeoJSON/summary endpoints, a short-lived in-memory FIRMS response cache, deployment blueprint and backend API tests. The map and Android data flow are implemented in source but still require Gradle sync, build and device verification. Persistent offline cache, production authentication/rate limiting and a live deployment remain outstanding. No GitHub Actions workflow is required.
 
 ## License
 MIT. See [LICENSE](LICENSE).
