@@ -18,8 +18,9 @@ android {
  }
  buildTypes {
   debug {
-   manifestPlaceholders["usesCleartextTraffic"] = "true"
-   buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000/\"")
+   // The manually distributed debug APK is installed on physical devices too.
+   // Use the HTTPS backend instead of the emulator-only 10.0.2.2 address.
+   manifestPlaceholders["usesCleartextTraffic"] = "false"
   }
   release { isMinifyEnabled = false; buildConfigField("String", "API_BASE_URL", "\"https://firepulse-api-git-feature-andro-38c882-krishnamdev127s-projects.vercel.app/\""); proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro") }
  }
