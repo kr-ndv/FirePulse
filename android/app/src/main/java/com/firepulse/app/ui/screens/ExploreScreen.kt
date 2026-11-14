@@ -44,7 +44,7 @@ import kotlinx.coroutines.withContext
    showingCache=false
    withContext(Dispatchers.IO) {
     val timestamp=System.currentTimeMillis()
-    dao.replaceSnapshot(response.observations.map { it.toEntity(timestamp,source,days) })
+    dao.replaceSnapshot(source,days,response.observations.map { it.toEntity(timestamp,source,days) })
     dao.deleteOlderThan(timestamp-30L*24L*60L*60L*1000L)
    }
   } catch(e:Exception) {
