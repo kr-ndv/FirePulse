@@ -32,7 +32,7 @@ uvicorn app.main:app --reload
 - Analytics summary: `/api/v1/summary`
 - Potential fire-activity clusters: `/api/v1/clusters` (experimental heuristic, not an official severity rating)
 
-See [API documentation](docs/API.md) and [deployment guide](docs/DEPLOYMENT.md).
+See [API documentation](docs/API.md) and [deployment guide](docs/DEPLOYMENT.md). The FastAPI backend includes a Vercel entrypoint; when importing the repository into Vercel, set the project Root Directory to `backend` and configure `FIRMS_MAP_KEY` as an environment variable.
 
 ## Run Android
 Open `android/` in Android Studio, sync Gradle and run the app. Debug emulator traffic targets `http://10.0.2.2:8000/`. A physical Android device needs a reachable LAN URL while developing. Set the HTTPS backend URL in the release BuildConfig before distributing a build.
