@@ -27,13 +27,17 @@ import kotlinx.coroutines.withContext
  var loading by remember { mutableStateOf(false) }
  var error by remember { mutableStateOf<String?>(null) }
  var expanded by remember { mutableStateOf(false) }
- var showingCache by remember { mutableStateOf(false) }\n var apiDataStatus by remember { mutableStateOf("live") }\n var cachedAt by remember { mutableStateOf<String?>(null) }
+ var showingCache by remember { mutableStateOf(false) }
+ var apiDataStatus by remember { mutableStateOf("live") }
+ var cachedAt by remember { mutableStateOf<String?>(null) }
 
  LaunchedEffect(source,days) {
   loading=true; error=null; showingCache=false
   val cached=withContext(Dispatchers.IO) { dao.getSnapshot(source,days).map { it.toObservation() } }
   if(cached.isNotEmpty()) {
    observations=cached
+   apiDataStatus="offline_cache"
+   cachedAt=null
    showingCache=true
   }
   try {
@@ -41,7 +45,9 @@ import kotlinx.coroutines.withContext
     ApiClient.firePulseApi.getFires(68.0,6.0,98.0,37.5,days,source)
    }
    observations=response.observations
-   showingCache=false
+   apiDataStatus=response.data_status ?: "live"
+   cachedAt=response.cached_at
+   showingCache=apiDataStatus == "stale_cache"
    withContext(Dispatchers.IO) {
     val timestamp=System.currentTimeMillis()
     dao.replaceSnapshot(source,days,response.observations.map { it.toEntity(timestamp,source,days) })
@@ -73,7 +79,10 @@ import kotlinx.coroutines.withContext
    Text("India fire activity",style=MaterialTheme.typography.titleMedium)
    Text(observations.size.toString()+" satellite detections",style=MaterialTheme.typography.headlineMedium)
    Text("Feed: "+source+" · Window: "+days+" day(s)",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
-   if(showingCache) Text("Server snapshot · NASA feed unavailable",style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.tertiary)\n   else if(!loading && !showingCache && error==null) Text("Live response",style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.primary)\n   cachedAt?.let { Text("Snapshot captured: "+it,style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant) }
+   if(apiDataStatus=="offline_cache") Text("Offline device cache",style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.tertiary)
+   else if(showingCache) Text("Recent server snapshot · NASA feed unavailable",style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.tertiary)
+   else if(!loading && error==null) Text("Live response",style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.primary)
+   cachedAt?.let { Text("Snapshot captured: "+it,style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant) }
   }
   if(loading) LinearProgressIndicator(Modifier.fillMaxWidth())
   error?.let { Text(it,color=if(showingCache) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error) }
