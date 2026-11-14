@@ -40,6 +40,8 @@ fun InsightsScreen() {
             summary = withContext(Dispatchers.IO) {
                 ApiClient.firePulseApi.getSummary(68.0, 6.0, 98.0, 37.5, 5, "VIIRS_NOAA21_NRT")
             }
+        } catch (cancelled: kotlinx.coroutines.CancellationException) {
+            throw cancelled
         } catch (e: Exception) {
             error = e.localizedMessage ?: "Unable to load analytics"
         }
@@ -158,6 +160,8 @@ fun InsightsScreen() {
                                         68.0, 6.0, 98.0, 37.5, historicalDate, 5, "VIIRS_NOAA21_SP"
                                     )
                                 }
+                            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                                throw cancelled
                             } catch (e: Exception) {
                                 historicalError = e.localizedMessage ?: "Historical data unavailable"
                             } finally {
