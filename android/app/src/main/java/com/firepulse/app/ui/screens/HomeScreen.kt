@@ -29,8 +29,7 @@ import kotlinx.coroutines.withContext
  }
  Column(Modifier.fillMaxSize().padding(20.dp),verticalArrangement=Arrangement.spacedBy(18.dp)) {
   Text("FIREPULSE",style=MaterialTheme.typography.labelLarge,color=Ember)
-  Text("Fire intelligence,
-from space.",style=MaterialTheme.typography.headlineLarge)
+  Text("Fire intelligence,\nfrom space.",style=MaterialTheme.typography.headlineLarge)
   Text("Satellite-observed active fire activity, organized for clearer understanding.",color=MaterialTheme.colorScheme.onSurfaceVariant)
   FirePulseCard(Modifier.fillMaxWidth()) {
    Row(horizontalArrangement=Arrangement.spacedBy(10.dp)){Icon(Icons.Default.Public,null,tint=Ember);Text("Global observation explorer",style=MaterialTheme.typography.titleMedium)}
