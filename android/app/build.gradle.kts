@@ -7,6 +7,7 @@ android {
  namespace = "com.firepulse.app"
  compileSdk = 35
  defaultConfig {
+  manifestPlaceholders["usesCleartextTraffic"] = "false"
   applicationId = "com.firepulse.app"
   minSdk = 26
   targetSdk = 35
@@ -15,7 +16,10 @@ android {
   buildConfigField("String", "API_BASE_URL", "\"https://api.example.com/\"")
  }
  buildTypes {
-  debug { buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000/\"") }
+  debug {
+   manifestPlaceholders["usesCleartextTraffic"] = "true"
+   buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000/\"")
+  }
   release { isMinifyEnabled = false; buildConfigField("String", "API_BASE_URL", "\"https://api.example.com/\""); proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro") }
  }
  compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
