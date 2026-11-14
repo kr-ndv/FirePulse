@@ -17,13 +17,16 @@ SAMPLE = [{
     "daynight": "D",
 }]
 
+
 async def fake_observations(*args, **kwargs):
     return SAMPLE
+
 
 def test_health_endpoint():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
+
 
 def test_fires_endpoint_returns_normalized_observations(monkeypatch):
     monkeypatch.setattr(fires, "fetch_area_observations", fake_observations)
@@ -34,6 +37,7 @@ def test_fires_endpoint_returns_normalized_observations(monkeypatch):
     assert response.json()["count"] == 1
     assert response.json()["observations"][0]["latitude"] == 25.1
 
+
 def test_geojson_endpoint_returns_longitude_latitude_order(monkeypatch):
     monkeypatch.setattr(analytics, "fetch_area_observations", fake_observations)
     response = client.get("/api/v1/fires/geojson", params={
@@ -42,6 +46,7 @@ def test_geojson_endpoint_returns_longitude_latitude_order(monkeypatch):
     assert response.status_code == 200
     feature = response.json()["features"][0]
     assert feature["geometry"]["coordinates"] == [78.2, 25.1]
+
 
 def test_summary_endpoint_aggregates_observations(monkeypatch):
     monkeypatch.setattr(analytics, "fetch_area_observations", fake_observations)
@@ -54,9 +59,25 @@ def test_summary_endpoint_aggregates_observations(monkeypatch):
     assert body["frp_total_mw"] == 12.4
     assert body["high_confidence_count"] == 1
 
+
 def test_fires_endpoint_rejects_invalid_source():
     response = client.get("/api/v1/fires", params={
         "west": 68, "south": 6, "east": 98, "north": 37.5,
         "source": "NOT_A_REAL_SENSOR"
+    })
+    assert response.status_code == 400
+
+
+def test_fires_endpoint_rejects_excessive_bounding_box():
+    response = client.get("/api/v1/fires", params={
+        "west": -170, "south": -80, "east": 170, "north": 80
+    })
+    assert response.status_code == 400
+    assert "too large" in response.json()["detail"]
+
+
+def test_fires_endpoint_rejects_antimeridian_box():
+    response = client.get("/api/v1/fires", params={
+        "west": 170, "south": -10, "east": -170, "north": 10
     })
     assert response.status_code == 400
