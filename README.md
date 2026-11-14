@@ -39,6 +39,9 @@ Open `android/` in Android Studio, sync Gradle and run the app. Debug emulator t
 ## Background refresh and offline snapshots
 The Android app schedules a unique WorkManager job to refresh the default India-area VIIRS SNPP five-day snapshot approximately every six hours when network connectivity is available. Android may defer periodic work due to battery and system scheduling policies; this is not a real-time feed. Successful refreshes replace the matching Room snapshot, which remains available to the Explore screen offline. Failed refreshes are retried with backoff. The worker does not issue notifications or emergency alerts.
 
+## Backend request safeguards
+The API has a process-local sliding-window rate limit (default 120 requests per client IP per minute), bounding-box size limit (default 5,000 degree-squared), and upstream concurrency cap (default 4 concurrent NASA FIRMS calls). These are configurable through environment variables documented in `backend/.env.example`. CORS is disabled by default for the native Android client. These in-process controls are a prototype baseline, not distributed production quotas; use a shared gateway/Redis limiter before scaling to multiple instances.
+
 ## Data sources
 - [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/)
 - [FIRMS Area API](https://firms.modaps.eosdis.nasa.gov/api/area/)
@@ -46,7 +49,7 @@ The Android app schedules a unique WorkManager job to refresh the default India-
 - [VIIRS active fire product](https://viirsland.gsfc.nasa.gov/Products/NASA/Fire.html)
 
 ## Project status
-The repository includes the Android app shell, navigation and theme, Retrofit data client, MapLibre map layer for FIRMS detections, Room-based offline observation snapshots, periodic WorkManager refresh, FastAPI observations/GeoJSON/summary endpoints, a short-lived in-memory FIRMS response cache, deployment blueprint and backend API tests. These changes are source-implemented but still require Gradle sync, build and device verification. The backend tests have not been run in this environment. Production authentication/rate limiting, monitoring and a live deployment remain outstanding. No GitHub Actions workflow is required or used.
+The repository includes the Android app shell, navigation and theme, Retrofit data client, MapLibre map layer for FIRMS detections, Room-based offline observation snapshots, periodic WorkManager refresh, FastAPI observations/GeoJSON/summary endpoints, a short-lived in-memory FIRMS response cache, request rate limiting, bounding-box limits, upstream concurrency controls, deployment blueprint and backend tests. All source changes still require Gradle sync/build, backend test execution and device verification. No live FIRMS request or deployment has been performed. Production authentication, distributed quotas, monitoring and deployment remain outstanding. No GitHub Actions workflow is required or used.
 
 ## License
 MIT. See [LICENSE](LICENSE).
