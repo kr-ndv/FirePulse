@@ -59,6 +59,10 @@ private val exploreAreas = listOf(
    apiDataStatus="offline_cache"
    cachedAt=null
    showingCache=true
+  } else {
+   observations=emptyList()
+   apiDataStatus="live"
+   cachedAt=null
   }
   try {
    val response=withContext(Dispatchers.IO) {
