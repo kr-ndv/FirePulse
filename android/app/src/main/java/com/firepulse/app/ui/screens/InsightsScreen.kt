@@ -34,6 +34,10 @@ import kotlinx.coroutines.withContext
    TextButton(onClick={refresh++},enabled=!loading){Text("Refresh")}
   }
   Text("India · VIIRS SNPP · Latest 5 days",color=MaterialTheme.colorScheme.onSurfaceVariant)
+  summary?.let { data ->
+   if(data.data_status=="stale_cache") Text("NASA FIRMS is temporarily unavailable. Showing the server snapshot captured at "+(data.cached_at ?: "an earlier time")+".",color=MaterialTheme.colorScheme.tertiary)
+   else Text("Live API response",color=MaterialTheme.colorScheme.primary)
+  }
   if(loading) LinearProgressIndicator(Modifier.fillMaxWidth())
   error?.let { Text("Analytics unavailable: "+it,color=MaterialTheme.colorScheme.error) }
   summary?.let { data ->
