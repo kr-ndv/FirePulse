@@ -7,7 +7,7 @@ The public prototype API does not implement user authentication. Do not expose a
 
 ## Endpoints
 - `GET /health` — liveness check.
-- `GET /api/v1/fires?west=...&south=...&east=...&north=...&days=1&source=VIIRS_SNPP_NRT` — normalized active-fire observations.
+- `GET /api/v1/fires?west=...&south=...&east=...&north=...&days=1&source=VIIRS_NOAA21_NRT` — normalized active-fire observations.
 - `GET /api/v1/fires/geojson?...same filters...` — GeoJSON FeatureCollection for map clients.
 - `GET /api/v1/summary?...same filters...` — total detections, per-day and per-satellite counts, summed FRP and high-confidence count.
 - `GET /api/v1/clusters?...same filters...&radius_km=5` — proximity-grouped hotspot clusters and an explicitly heuristic activity score. `radius_km` is limited to 0.5–25 km.
@@ -18,11 +18,11 @@ Successful FIRMS responses are cached in process memory for 60 seconds (maximum 
 The cache is process-local, non-persistent and not shared between server instances. A stale response is not a current observation; clients must label it clearly and must not reset their local freshness clock when storing it.
 
 ## Request constraints
-Bounding coordinates are WGS84 degrees. Days are limited to 1–5. Supported sources are MODIS_NRT, VIIRS_SNPP_NRT, VIIRS_NOAA20_NRT and VIIRS_NOAA21_NRT. The east/west dateline-crossing case is not supported. CSV headers are normalized for whitespace/case, invalid coordinates and non-finite numeric values are discarded, and HTML/JSON error pages are rejected rather than presented as an empty fire dataset.
+Bounding coordinates are WGS84 degrees. Days are limited to 1–5. Supported sources are MODIS_NRT, VIIRS_SNPP_NRT (legacy; no new observations after 2026-11-02), VIIRS_NOAA20_NRT and VIIRS_NOAA21_NRT. The east/west dateline-crossing case is not supported. CSV headers are normalized for whitespace/case, invalid coordinates and non-finite numeric values are discarded, and HTML/JSON error pages are rejected rather than presented as an empty fire dataset.
 
 ## Example
 ```bash
-curl "http://localhost:8000/api/v1/fires?west=75&south=8&east=90&north=22&days=1&source=VIIRS_SNPP_NRT"
+curl "http://localhost:8000/api/v1/fires?west=75&south=8&east=90&north=22&days=1&source=VIIRS_NOAA21_NRT"
 ```
 
 A detection is a satellite thermal anomaly, not a confirmed fire perimeter or proof of ground conditions. Acquisition time is supplied by FIRMS and should be treated as UTC unless the source documentation specifies otherwise.
@@ -37,7 +37,7 @@ The endpoint limits input to 5,000 observations and radius to 0.5–25 km. It re
 
 
 ## Historical activity summary
-- `GET /api/v1/history?west=...&south=...&east=...&north=...&start_date=YYYY-MM-DD&days=1..5&source=VIIRS_SNPP_SP`
+- `GET /api/v1/history?west=...&south=...&east=...&north=...&start_date=YYYY-MM-DD&days=1..5&source=VIIRS_NOAA21_SP`
 - Requests an explicit date window. NASA FIRMS interprets the date as the first day and returns that day through `start_date + days - 1`.
 - Supports the matching Standard Processing archive products: `MODIS_SP`, `VIIRS_SNPP_SP`, `VIIRS_NOAA20_SP`, and `VIIRS_NOAA21_SP`. NRT source IDs are also accepted for date-scoped requests where NASA still has those dates available.
 - The endpoint returns total detections, per-day and per-satellite counts, summed FRP, high-confidence count, requested date bounds and cache freshness metadata.
