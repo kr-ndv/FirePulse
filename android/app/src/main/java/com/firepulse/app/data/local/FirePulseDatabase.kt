@@ -36,21 +36,21 @@ interface FireObservationDao {
     suspend fun getSnapshot(source: String, days: Int): List<FireObservationEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(items: List<FireObservationEntity>)
+    suspend fun insertAll(items: List<FireObservationEntity>): List<Long>
 
     @Query("DELETE FROM fire_observations WHERE source = :source AND requestedDays = :days")
-    suspend fun clearSnapshot(source: String, days: Int)
+    suspend fun clearSnapshot(source: String, days: Int): Int
 
     @Query("SELECT MAX(cachedAt) FROM fire_observations WHERE source = :source AND requestedDays = :days")
     suspend fun getSnapshotCachedAt(source: String, days: Int): Long?
 
     @Query("DELETE FROM fire_observations WHERE cachedAt < :cutoff")
-    suspend fun deleteOlderThan(cutoff: Long)
+    suspend fun deleteOlderThan(cutoff: Long): Int
 
     @Transaction
-    suspend fun replaceSnapshot(source: String, days: Int, items: List<FireObservationEntity>) {
+    suspend fun replaceSnapshot(source: String, days: Int, items: List<FireObservationEntity>): Int {
         clearSnapshot(source, days)
-        if (items.isNotEmpty()) insertAll(items)
+        return if (items.isEmpty()) 0 else insertAll(items).size
     }
 }
 
