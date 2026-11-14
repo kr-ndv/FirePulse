@@ -23,7 +23,7 @@ fun InsightsScreen() {
     var clusters by remember { mutableStateOf<FireClustersResponse?>(null) }
     var clusterError by remember { mutableStateOf<String?>(null) }
     var historical by remember { mutableStateOf<HistoricalFireSummaryResponse?>(null) }
-    var historicalDate by remember { mutableStateOf("2026-10-01") }
+    var historicalDate by remember { mutableStateOf(java.time.LocalDate.now().minusDays(7).toString()) }
     var historicalLoading by remember { mutableStateOf(false) }
     var historicalError by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
@@ -141,9 +141,12 @@ fun InsightsScreen() {
                     historicalLoading = true
                     historicalError = null
                     historical = null
-                    val validDate = runCatching { java.time.LocalDate.parse(historicalDate) }.isSuccess
-                    if (!validDate) {
+                    val parsedDate = runCatching { java.time.LocalDate.parse(historicalDate) }.getOrNull()
+                    if (parsedDate == null) {
                         historicalError = "Enter a valid date in YYYY-MM-DD format."
+                        historicalLoading = false
+                    } else if (parsedDate.isAfter(java.time.LocalDate.now())) {
+                        historicalError = "The archive start date cannot be in the future."
                         historicalLoading = false
                     } else {
                         scope.launch {
