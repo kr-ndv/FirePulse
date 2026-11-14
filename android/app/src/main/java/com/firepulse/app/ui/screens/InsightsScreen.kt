@@ -14,9 +14,11 @@ import com.firepulse.app.data.remote.HistoricalFireSummaryResponse
 import com.firepulse.app.ui.components.FirePulseCard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 
 @Composable
 fun InsightsScreen() {
+    val scope = rememberCoroutineScope()
     var summary by remember { mutableStateOf<FireSummaryResponse?>(null) }
     var clusters by remember { mutableStateOf<FireClustersResponse?>(null) }
     var clusterError by remember { mutableStateOf<String?>(null) }
@@ -144,7 +146,7 @@ fun InsightsScreen() {
                         historicalError = "Enter a valid date in YYYY-MM-DD format."
                         historicalLoading = false
                     } else {
-                        kotlinx.coroutines.MainScope().launch {
+                        scope.launch {
                             try {
                                 historical = withContext(Dispatchers.IO) {
                                     ApiClient.firePulseApi.getHistoricalSummary(
