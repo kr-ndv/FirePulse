@@ -14,6 +14,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.firepulse.app.data.remote.FireObservation
+import com.firepulse.app.data.remote.FireCluster
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
@@ -30,11 +31,14 @@ import org.maplibre.geojson.Point
 
 private const val FIRE_SOURCE_ID = "firepulse-observations"
 private const val FIRE_LAYER_ID = "firepulse-hotspots"
+private const val CLUSTER_SOURCE_ID = "firepulse-clusters"
+private const val CLUSTER_LAYER_ID = "firepulse-cluster-centres"
 private const val MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty"
 
 @Composable
 fun FireActivityMap(
     observations: List<FireObservation>,
+    clusters: List<FireCluster> = emptyList(),
     modifier: Modifier = Modifier,
     initialTarget: LatLng = LatLng(22.0, 79.0),
     initialZoom: Double = 4.2
@@ -90,6 +94,20 @@ fun FireActivityMap(
                                 )
                             )
                         }
+                        if (style.getSource(CLUSTER_SOURCE_ID) == null) {
+                            style.addSource(GeoJsonSource(CLUSTER_SOURCE_ID, FeatureCollection.fromFeatures(emptyArray<Feature>())))
+                        }
+                        if (style.getLayer(CLUSTER_LAYER_ID) == null) {
+                            style.addLayer(
+                                CircleLayer(CLUSTER_LAYER_ID, CLUSTER_SOURCE_ID).withProperties(
+                                    circleColor("#7B1FA2"),
+                                    circleRadius(10f),
+                                    circleOpacity(0.9f),
+                                    org.maplibre.android.style.layers.PropertyFactory.circleStrokeColor("#FFFFFF"),
+                                    org.maplibre.android.style.layers.PropertyFactory.circleStrokeWidth(2f)
+                                )
+                            )
+                        }
                         styleReady = true
                     }
                 }
@@ -97,7 +115,7 @@ fun FireActivityMap(
         }
     )
 
-    LaunchedEffect(observations, styleReady) {
+    LaunchedEffect(observations, clusters, styleReady) {
         if (styleReady) {
             val features = observations.mapNotNull { fire ->
                 val lat = fire.latitude
@@ -112,6 +130,21 @@ fun FireActivityMap(
             }
             val collection = FeatureCollection.fromFeatures(features)
             mapInstance.value?.style?.getSourceAs<GeoJsonSource>(FIRE_SOURCE_ID)?.setGeoJson(collection)
+
+            val clusterFeatures = clusters.mapNotNull { cluster ->
+                val lat = cluster.latitude
+                val lon = cluster.longitude
+                if (lat !in -90.0..90.0 || lon !in -180.0..180.0) null
+                else Feature.fromGeometry(Point.fromLngLat(lon, lat)).apply {
+                    addNumberProperty("cluster_id", cluster.cluster_id)
+                    addNumberProperty("detection_count", cluster.detection_count)
+                    addNumberProperty("severity_score", cluster.severity_score)
+                    addStringProperty("severity_label", cluster.severity_label)
+                    addNumberProperty("frp_total_mw", cluster.frp_total_mw)
+                }
+            }
+            mapInstance.value?.style?.getSourceAs<GeoJsonSource>(CLUSTER_SOURCE_ID)
+                ?.setGeoJson(FeatureCollection.fromFeatures(clusterFeatures))
         }
     }
 }
