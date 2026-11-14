@@ -25,13 +25,15 @@ data class FireObservationEntity(
     val frp: Double?,
     val brightness: Double?,
     val daynight: String?,
+    val source: String,
+    val requestedDays: Int,
     val cachedAt: Long
 )
 
 @Dao
 interface FireObservationDao {
-    @Query("SELECT * FROM fire_observations ORDER BY acquisitionDate DESC, acquisitionTime DESC LIMIT 5000")
-    suspend fun getRecent(): List<FireObservationEntity>
+    @Query("SELECT * FROM fire_observations WHERE source = :source AND requestedDays = :days ORDER BY acquisitionDate DESC, acquisitionTime DESC LIMIT 5000")
+    suspend fun getSnapshot(source: String, days: Int): List<FireObservationEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(items: List<FireObservationEntity>)
@@ -67,7 +69,7 @@ abstract class FirePulseDatabase : RoomDatabase() {
     }
 }
 
-fun com.firepulse.app.data.remote.FireObservation.toEntity(cachedAt: Long) =
+fun com.firepulse.app.data.remote.FireObservation.toEntity(cachedAt: Long, source: String, requestedDays: Int) =
     FireObservationEntity(
         id = listOf(latitude.toString(), longitude.toString(), acquisition_date,
             acquisition_time.orEmpty(), satellite.orEmpty()).joinToString("|"),
@@ -81,6 +83,8 @@ fun com.firepulse.app.data.remote.FireObservation.toEntity(cachedAt: Long) =
         frp = frp,
         brightness = brightness,
         daynight = daynight,
+        source = source,
+        requestedDays = requestedDays,
         cachedAt = cachedAt
     )
 
