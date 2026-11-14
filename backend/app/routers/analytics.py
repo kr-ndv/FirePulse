@@ -7,9 +7,9 @@ from app.services.clustering import cluster_observations
 router = APIRouter(tags=["analytics"])
 
 
-async def _load_rows(source, west, south, east, north, days):
+async def _load_rows(source, west, south, east, north, days, start_date=None):
     try:
-        return await fetch_area_observations(source, west, south, east, north, days), "live", None
+        return await fetch_area_observations(source, west, south, east, north, days, start_date), "live", None
     except StaleCacheError as exc:
         return exc.observations, "stale_cache", exc.cached_at
     except ValueError as exc:
@@ -99,4 +99,43 @@ async def fire_clusters(
         "cached_at": cached_at,
         "scoring_method": "FirePulse heuristic v1: detection count 40%, summed FRP 40%, high-confidence share 20%",
         "clusters": clusters,
+    }
+
+ 
+
+@router.get("/history")
+async def historical_summary(
+    west: float = Query(..., ge=-180, le=180),
+    south: float = Query(..., ge=-90, le=90),
+    east: float = Query(..., ge=-180, le=180),
+    north: float = Query(..., ge=-90, le=90),
+    start_date: date = Query(..., description="First UTC acquisition date, YYYY-MM-DD"),
+    days: int = Query(1, ge=1, le=5),
+    source: str = Query("VIIRS_SNPP_SP"),
+):
+    """Aggregate FIRMS observations for an explicit historical date window."""
+    if south >= north or west >= east:
+        raise HTTPException(status_code=400, detail="Invalid bounding box")
+    if start_date > date.today():
+        raise HTTPException(status_code=400, detail="start_date cannot be in the future")
+    rows, data_status, cached_at = await _load_rows(
+        source, west, south, east, north, days, start_date.isoformat()
+    )
+    by_day = Counter(r["acquisition_date"] for r in rows if r.get("acquisition_date"))
+    by_satellite = Counter(r.get("satellite") or "Unknown" for r in rows)
+    return {
+        "source": source,
+        "days": days,
+        "start_date": start_date.isoformat(),
+        "end_date": date.fromordinal(start_date.toordinal() + days - 1).isoformat(),
+        "count": len(rows),
+        "data_status": data_status,
+        "cached_at": cached_at,
+        "by_day": [{"date": key, "detections": value} for key, value in sorted(by_day.items())],
+        "by_satellite": [{"satellite": key, "detections": value} for key, value in sorted(by_satellite.items())],
+        "frp_total_mw": round(sum(row.get("frp") or 0 for row in rows), 2),
+        "high_confidence_count": sum(
+            str(row.get("confidence", "")).lower() in {"h", "high"} for row in rows
+        ),
+        "note": "Historical satellite detections are observations, not confirmed fire perimeters or burned area.",
     }
