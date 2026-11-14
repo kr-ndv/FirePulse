@@ -49,7 +49,15 @@ async def fetch_area_observations(source: str, west: float, south: float,
     if not 1 <= days <= 5:
         raise ValueError("days must be between 1 and 5")
 
-    if start_date is not None:\n        try:\n            requested_date = date.fromisoformat(start_date)\n        except ValueError as exc:\n            raise ValueError("start_date must use YYYY-MM-DD format") from exc\n        if requested_date > date.today():\n            raise ValueError("start_date cannot be in the future")\n\n    cache_key = (source, west, south, east, north, days, start_date)
+    if start_date is not None:
+        try:
+            requested_date = date.fromisoformat(start_date)
+        except ValueError as exc:
+            raise ValueError("start_date must use YYYY-MM-DD format") from exc
+        if requested_date > date.today():
+            raise ValueError("start_date cannot be in the future")
+
+    cache_key = (source, west, south, east, north, days, start_date)
     now = time.monotonic()
     cached = None
     async with _cache_lock:
@@ -65,7 +73,9 @@ async def fetch_area_observations(source: str, west: float, south: float,
         raise RuntimeError("FIRMS_MAP_KEY is not configured on the server")
     base = os.getenv("FIRMS_BASE_URL", "https://firms.modaps.eosdis.nasa.gov/api/area/csv").rstrip("/")
     area = f"{west},{south},{east},{north}"
-    url = f"{base}/{map_key}/{source}/{area}/{days}"\n    if start_date is not None:\n        url = f"{url}/{start_date}"
+    url = f"{base}/{map_key}/{source}/{area}/{days}"
+    if start_date is not None:
+        url = f"{url}/{start_date}"
 
     try:
         async with _upstream_semaphore:
