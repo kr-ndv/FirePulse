@@ -94,6 +94,8 @@ private val exploreAreas = listOf(
      dao.deleteOlderThan(timestamp-30L*24L*60L*60L*1000L)
     }
    }
+  } catch(cancelled: kotlinx.coroutines.CancellationException) {
+   throw cancelled
   } catch(e:Exception) {
    error=if(cached.isNotEmpty()) "Showing saved observations. Live refresh failed: "+(e.localizedMessage ?: "network unavailable")
          else e.localizedMessage ?: "Unable to reach FirePulse API"
