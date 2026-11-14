@@ -31,6 +31,7 @@ private val exploreAreas = listOf(
  ExploreArea("Northeast India",89.0,21.0,98.0,30.5)
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable fun ExploreScreen() {
  val context=LocalContext.current
  val dao=remember { FirePulseDatabase.getInstance(context).fireObservationDao() }
