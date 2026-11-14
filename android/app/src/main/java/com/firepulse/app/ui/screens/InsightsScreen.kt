@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
  var refresh by remember { mutableIntStateOf(0) }
 
  LaunchedEffect(refresh) {
-  loading=true; error=null
+  loading=true; error=null; summary=null
   try {
    summary=withContext(Dispatchers.IO) {
     ApiClient.firePulseApi.getSummary(68.0,6.0,98.0,37.5,5,"VIIRS_SNPP_NRT")
