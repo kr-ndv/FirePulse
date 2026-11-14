@@ -90,7 +90,7 @@ interface FirePulseApi {
         @Query("east") east: Double,
         @Query("north") north: Double,
         @Query("days") days: Int = 1,
-        @Query("source") source: String = "VIIRS_SNPP_NRT"
+        @Query("source") source: String = "VIIRS_NOAA21_NRT"
     ): FireObservationsResponse
 
     @GET("api/v1/clusters")
@@ -100,7 +100,7 @@ interface FirePulseApi {
         @Query("east") east: Double,
         @Query("north") north: Double,
         @Query("days") days: Int = 5,
-        @Query("source") source: String = "VIIRS_SNPP_NRT",
+        @Query("source") source: String = "VIIRS_NOAA21_NRT",
         @Query("radius_km") radiusKm: Double = 5.0
     ): FireClustersResponse
 
@@ -112,7 +112,7 @@ interface FirePulseApi {
         @Query("north") north: Double,
         @Query("start_date") startDate: String,
         @Query("days") days: Int = 5,
-        @Query("source") source: String = "VIIRS_SNPP_SP"
+        @Query("source") source: String = "VIIRS_NOAA21_SP"
     ): HistoricalFireSummaryResponse
 
     @GET("api/v1/summary")
@@ -122,6 +122,6 @@ interface FirePulseApi {
         @Query("east") east: Double,
         @Query("north") north: Double,
         @Query("days") days: Int = 5,
-        @Query("source") source: String = "VIIRS_SNPP_NRT"
+        @Query("source") source: String = "VIIRS_NOAA21_NRT"
     ): FireSummaryResponse
 }
