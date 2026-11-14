@@ -11,7 +11,7 @@ The public prototype API does not implement user authentication. Do not expose a
 - `GET /api/v1/fires/geojson?...same filters...` — GeoJSON FeatureCollection for map clients.
 - `GET /api/v1/summary?...same filters...` — total detections, per-day and per-satellite counts, summed FRP and high-confidence count.
 
-Bounding coordinates are WGS84 degrees. Days are limited to 1–5. Supported sources are MODIS_NRT, VIIRS_SNPP_NRT, VIIRS_NOAA20_NRT and VIIRS_NOAA21_NRT. The east/west dateline-crossing case is not supported by the current FIRMS Area API wrapper.
+The backend caches identical successful area requests in process memory for 60 seconds (maximum 128 cache entries) to reduce repeat upstream calls. This cache is not persistent or shared between multiple server instances.\n\nBounding coordinates are WGS84 degrees. Days are limited to 1–5. Supported sources are MODIS_NRT, VIIRS_SNPP_NRT, VIIRS_NOAA20_NRT and VIIRS_NOAA21_NRT. The east/west dateline-crossing case is not supported by the current FIRMS Area API wrapper.
 
 ## Example
 ```bash
