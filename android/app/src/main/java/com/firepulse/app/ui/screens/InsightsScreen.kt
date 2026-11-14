@@ -38,14 +38,14 @@ fun InsightsScreen() {
         clusterError = null
         try {
             summary = withContext(Dispatchers.IO) {
-                ApiClient.firePulseApi.getSummary(68.0, 6.0, 98.0, 37.5, 5, "VIIRS_SNPP_NRT")
+                ApiClient.firePulseApi.getSummary(68.0, 6.0, 98.0, 37.5, 5, "VIIRS_NOAA21_NRT")
             }
         } catch (e: Exception) {
             error = e.localizedMessage ?: "Unable to load analytics"
         }
         try {
             clusters = withContext(Dispatchers.IO) {
-                ApiClient.firePulseApi.getClusters(68.0, 6.0, 98.0, 37.5, 5, "VIIRS_SNPP_NRT", 5.0)
+                ApiClient.firePulseApi.getClusters(68.0, 6.0, 98.0, 37.5, 5, "VIIRS_NOAA21_NRT", 5.0)
             }
         } catch (clusterException: Exception) {
             clusterError = clusterException.localizedMessage ?: "Unable to load hotspot clusters"
@@ -61,7 +61,7 @@ fun InsightsScreen() {
             Text("Insights", style = MaterialTheme.typography.headlineLarge)
             TextButton(onClick = { refresh++ }, enabled = !loading) { Text("Refresh") }
         }
-        Text("India · VIIRS SNPP · Latest 5 days", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("India · VIIRS NOAA-21 · Latest 5 days", color = MaterialTheme.colorScheme.onSurfaceVariant)
         summary?.let { data ->
             if (data.data_status == "stale_cache") {
                 Text(
@@ -150,7 +150,7 @@ fun InsightsScreen() {
                             try {
                                 historical = withContext(Dispatchers.IO) {
                                     ApiClient.firePulseApi.getHistoricalSummary(
-                                        68.0, 6.0, 98.0, 37.5, historicalDate, 5, "VIIRS_SNPP_SP"
+                                        68.0, 6.0, 98.0, 37.5, historicalDate, 5, "VIIRS_NOAA21_SP"
                                     )
                                 }
                             } catch (e: Exception) {
