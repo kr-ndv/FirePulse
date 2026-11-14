@@ -81,7 +81,7 @@ private val exploreAreas = listOf(
     }
     clusters=clusterResponse.clusters
     clusterError=null
-   } catch(clusterException:Exception) {
+   } catch(cancelled: kotlinx.coroutines.CancellationException) {\n    throw cancelled\n   } catch(clusterException:Exception) {
     clusters=emptyList()
     clusterError=clusterException.localizedMessage ?: "Cluster overlay unavailable"
    }
