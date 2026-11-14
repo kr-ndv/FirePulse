@@ -29,7 +29,8 @@ uvicorn app.main:app --reload
 - API docs: `http://localhost:8000/docs`
 - Fire observations: `/api/v1/fires`
 - GeoJSON map feed: `/api/v1/fires/geojson`
-- Analytics summary: `/api/v1/summary`\n- Potential fire-activity clusters: `/api/v1/clusters` (experimental heuristic, not an official severity rating)
+- Analytics summary: `/api/v1/summary`
+- Potential fire-activity clusters: `/api/v1/clusters` (experimental heuristic, not an official severity rating)
 
 See [API documentation](docs/API.md) and [deployment guide](docs/DEPLOYMENT.md).
 
