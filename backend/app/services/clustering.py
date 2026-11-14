@@ -4,7 +4,7 @@ These clusters are analytical groupings of FIRMS thermal anomalies, not
 validated fire perimeters or official incident/severity classifications.
 """
 from collections import defaultdict
-from math import ceil, cos, radians, asin, sqrt
+from math import ceil, cos, radians, asin, sqrt, sin
 
 EARTH_RADIUS_KM = 6371.0088
 MAX_CLUSTER_INPUT = 5000
@@ -14,8 +14,8 @@ def _distance_km(a: dict, b: dict) -> float:
     lat1, lon1 = radians(a["latitude"]), radians(a["longitude"])
     lat2, lon2 = radians(b["latitude"]), radians(b["longitude"])
     dlat, dlon = lat2 - lat1, lon2 - lon1
-    h = sin2 = __import__("math").sin(dlat / 2) ** 2
-    h += cos(lat1) * cos(lat2) * __import__("math").sin(dlon / 2) ** 2
+    h = sin(dlat / 2) ** 2
+    h += cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     return 2 * EARTH_RADIUS_KM * asin(sqrt(min(1.0, h)))
 
 
