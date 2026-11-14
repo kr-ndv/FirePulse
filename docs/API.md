@@ -34,3 +34,13 @@ The clusters endpoint groups observations whose great-circle separation is withi
 FirePulse heuristic v1 computes a 0–100 score from three capped components: detection count contributes up to 40 points (10 detections saturates this component), summed FRP contributes up to 40 points (100 MW saturates this component), and the share of high-confidence detections contributes up to 20 points. Labels are low (<25), moderate (25–49.9), elevated (50–74.9) and high (75–100). This is an experimental ranking heuristic, not a validated fire-danger index, incident severity assessment, probability of spread, or official warning. It does not account for wind, fuel, terrain, weather, population exposure, active fire perimeter, or sensor sampling bias.
 
 The endpoint limits input to 5,000 observations and radius to 0.5–25 km. It returns the same freshness metadata as other FIRMS-backed endpoints. Do not interpret clusters as confirmed incidents.
+
+
+## Historical activity summary
+- `GET /api/v1/history?west=...&south=...&east=...&north=...&start_date=YYYY-MM-DD&days=1..5&source=VIIRS_SNPP_SP`
+- Requests an explicit date window. NASA FIRMS interprets the date as the first day and returns that day through `start_date + days - 1`.
+- Supports the matching Standard Processing archive products: `MODIS_SP`, `VIIRS_SNPP_SP`, `VIIRS_NOAA20_SP`, and `VIIRS_NOAA21_SP`. NRT source IDs are also accepted for date-scoped requests where NASA still has those dates available.
+- The endpoint returns total detections, per-day and per-satellite counts, summed FRP, high-confidence count, requested date bounds and cache freshness metadata.
+- Dates must be valid ISO dates and cannot start in the future. Each request is limited to five days, matching the FIRMS Area API contract. For longer periods, clients should request separate windows rather than silently issuing a large burst of upstream transactions.
+- Standard Processing (SP) products are science-quality archive products and may have a processing lag. Historical results should not be compared directly with NRT counts without noting product and processing differences.
+- Historical detections remain thermal anomalies, not confirmed fire perimeters, burned area or incident records.
