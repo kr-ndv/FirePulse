@@ -33,15 +33,17 @@ class FireRefreshWorker(
             )
         }
 
-        val dao = FirePulseDatabase.getInstance(applicationContext).fireObservationDao()
-        val now = System.currentTimeMillis()
-        withContext(Dispatchers.IO) {
-            dao.replaceSnapshot(
-                source = source,
-                days = days,
-                items = response.observations.map { it.toEntity(now, source, days) }
-            )
-            dao.deleteOlderThan(now - CACHE_RETENTION_MILLIS)
+        if (response.data_status == "live") {
+            val dao = FirePulseDatabase.getInstance(applicationContext).fireObservationDao()
+            val now = System.currentTimeMillis()
+            withContext(Dispatchers.IO) {
+                dao.replaceSnapshot(
+                    source = source,
+                    days = days,
+                    items = response.observations.map { it.toEntity(now, source, days) }
+                )
+                dao.deleteOlderThan(now - CACHE_RETENTION_MILLIS)
+            }
         }
         Result.success()
     } catch (cancelled: kotlinx.coroutines.CancellationException) {
