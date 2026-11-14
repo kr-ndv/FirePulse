@@ -48,10 +48,12 @@ import kotlinx.coroutines.withContext
    apiDataStatus=response.data_status ?: "live"
    cachedAt=response.cached_at
    showingCache=apiDataStatus == "stale_cache"
-   withContext(Dispatchers.IO) {
-    val timestamp=System.currentTimeMillis()
-    dao.replaceSnapshot(source,days,response.observations.map { it.toEntity(timestamp,source,days) })
-    dao.deleteOlderThan(timestamp-30L*24L*60L*60L*1000L)
+   if(apiDataStatus=="live") {
+    withContext(Dispatchers.IO) {
+     val timestamp=System.currentTimeMillis()
+     dao.replaceSnapshot(source,days,response.observations.map { it.toEntity(timestamp,source,days) })
+     dao.deleteOlderThan(timestamp-30L*24L*60L*60L*1000L)
+    }
    }
   } catch(e:Exception) {
    error=if(cached.isNotEmpty()) "Showing saved observations. Live refresh failed: "+(e.localizedMessage ?: "network unavailable")
