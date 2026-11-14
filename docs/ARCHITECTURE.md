@@ -3,9 +3,9 @@
 FirePulse consists of a native Android client and a stateless FastAPI service. The service owns the NASA FIRMS MAP_KEY and normalizes MODIS/VIIRS active-fire CSV observations.
 
 ## Components
-- Android: Kotlin, Jetpack Compose, Material 3 and Retrofit API client.
+- Android: Kotlin, Jetpack Compose, Material 3, Retrofit API client and MapLibre Native map rendering.\n- Map: OpenFreeMap Liberty style with OpenStreetMap attribution; FIRMS detections are rendered as GeoJSON circle features.
 - API: FastAPI endpoints for observations, GeoJSON and aggregate summaries.
-- Source: NASA FIRMS Area API; supported near-real-time MODIS and VIIRS feeds.
+- Source: NASA FIRMS Area API; supported near-real-time MODIS and VIIRS feeds.\n- API cache: 60-second in-memory cache (up to 128 area/source/window keys) to reduce duplicate FIRMS requests.
 - Harmonization: stable observation fields, source/satellite identity, daily counts and prototype spatial grid helper.
 - Deployment: container-compatible FastAPI service with a Render Blueprint.
 
@@ -17,7 +17,7 @@ FirePulse consists of a native Android client and a stateless FastAPI service. T
 5. Android can render detections and explain the sensor/source metadata.
 
 ## Trust boundaries and limitations
-The MAP_KEY must never be embedded in Android or committed. Current prototype endpoints do not include user authentication, quotas or persistent response caching. Add these before public production use. Current bounding-box requests do not support antimeridian-crossing bounds. Satellite detections are thermal anomalies, not confirmed incidents, perimeters or evacuation guidance.
+The MAP_KEY must never be embedded in Android or committed. Current prototype endpoints do not include user authentication or quotas. The response cache is process-local and short-lived, not a persistent/shared cache. Add these before public production use. Current bounding-box requests do not support antimeridian-crossing bounds. Satellite detections are thermal anomalies, not confirmed incidents, perimeters or evacuation guidance.
 
 ## Verification status
 Source changes are committed on the feature branch. A local Android Gradle sync/build and end-to-end request against a valid FIRMS key have not yet been run; do not treat this repository as build-verified.
