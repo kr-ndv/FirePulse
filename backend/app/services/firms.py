@@ -21,10 +21,13 @@ async def fetch_area_observations(source: str, west: float, south: float,
     base = os.getenv("FIRMS_BASE_URL", "https://firms.modaps.eosdis.nasa.gov/api/area/csv").rstrip("/")
     area = f"{west},{south},{east},{north}"
     url = f"{base}/{map_key}/{source}/{area}/{days}"
-    async with httpx.AsyncClient(timeout=httpx.Timeout(25.0, connect=8.0),
-                                 headers={"User-Agent": "FirePulse/0.2 (+https://github.com/kr-ndv/FirePulse)"}) as client:
-        response = await client.get(url)
-        response.raise_for_status()
+    try:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(25.0, connect=8.0),
+                                     headers={"User-Agent": "FirePulse/0.2"}) as client:
+            response = await client.get(url)
+            response.raise_for_status()
+    except httpx.HTTPError as exc:
+        raise RuntimeError("NASA FIRMS request failed or timed out") from exc
     reader = csv.DictReader(io.StringIO(response.text))
     if not reader.fieldnames or "latitude" not in reader.fieldnames or "longitude" not in reader.fieldnames:
         raise RuntimeError("NASA FIRMS returned an unexpected response; verify the MAP_KEY, source and request limits")
@@ -34,14 +37,10 @@ async def fetch_area_observations(source: str, west: float, south: float,
         if latitude is None or longitude is None:
             continue
         observations.append({
-            "latitude": latitude,
-            "longitude": longitude,
-            "acquisition_date": row.get("acq_date"),
-            "acquisition_time": row.get("acq_time"),
-            "satellite": row.get("satellite"),
-            "instrument": row.get("instrument"),
-            "confidence": row.get("confidence"),
-            "frp": _num(row.get("frp")),
+            "latitude": latitude, "longitude": longitude,
+            "acquisition_date": row.get("acq_date"), "acquisition_time": row.get("acq_time"),
+            "satellite": row.get("satellite"), "instrument": row.get("instrument"),
+            "confidence": row.get("confidence"), "frp": _num(row.get("frp")),
             "brightness": _num(row.get("bright_ti4") or row.get("brightness")),
             "daynight": row.get("daynight"),
         })
