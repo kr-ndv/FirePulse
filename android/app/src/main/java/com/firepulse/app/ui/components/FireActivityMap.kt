@@ -64,8 +64,25 @@ fun FireActivityMap(
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
+
+        // A composable can enter after the Activity is already STARTED/RESUMED.
+        // Lifecycle observers do not replay the current state, so synchronize
+        // MapView explicitly when it is first attached.
+        if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            mapView.onStart()
+        }
+        if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            mapView.onResume()
+        }
+
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+            if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                mapView.onPause()
+            }
+            if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                mapView.onStop()
+            }
             mapView.onDestroy()
         }
     }
