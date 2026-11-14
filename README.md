@@ -56,5 +56,9 @@ The repository includes the Android app shell, navigation and theme, Retrofit da
 MIT. See [LICENSE](LICENSE).
 
 
+## Geographic exploration
+
+Explore includes broad India geographic-area presets (All India, North, Central, East, West, South and Northeast) that apply rectangular WGS84 search bounds to the FIRMS request and cluster overlay. These are discovery filters, not administrative boundaries: regions overlap and detections near a boundary may be included or excluded according to the rectangle. State- and district-level polygon filtering is not implemented yet. Device offline snapshots currently apply to the All India query only.
+
 ## Experimental hotspot clustering
 FirePulse can group nearby detections into potential activity clusters and rank them using a documented heuristic based on detection count, summed FRP and high-confidence share. The default neighborhood radius is 5 km. Insights displays the highest-ranked clusters and their coordinates. These groupings are not verified incidents, fire perimeters, official danger ratings or emergency alerts. See [data methodology](docs/DATA_METHODOLOGY.md) for the exact scoring formula and limitations.
