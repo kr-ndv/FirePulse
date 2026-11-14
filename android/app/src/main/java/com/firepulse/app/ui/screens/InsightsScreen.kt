@@ -6,19 +6,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.firepulse.app.data.remote.ApiClient
-import com.firepulse.app.data.remote.FireSummaryResponse
+import com.firepulse.app.data.remote.FireSummaryResponse\nimport com.firepulse.app.data.remote.FireClustersResponse
 import com.firepulse.app.ui.components.FirePulseCard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable fun InsightsScreen() {
- var summary by remember { mutableStateOf<FireSummaryResponse?>(null) }
+ var summary by remember { mutableStateOf<FireSummaryResponse?>(null) }\n var clusters by remember { mutableStateOf<FireClustersResponse?>(null) }\n var clusterError by remember { mutableStateOf<String?>(null) }
  var loading by remember { mutableStateOf(true) }
  var error by remember { mutableStateOf<String?>(null) }
  var refresh by remember { mutableIntStateOf(0) }
 
  LaunchedEffect(refresh) {
-  loading=true; error=null; summary=null
+  loading=true; error=null; summary=null; clusters=null; clusterError=null
   try {
    summary=withContext(Dispatchers.IO) {
     ApiClient.firePulseApi.getSummary(68.0,6.0,98.0,37.5,5,"VIIRS_SNPP_NRT")
